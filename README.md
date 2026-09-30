@@ -1,6 +1,6 @@
-# Docktor — versão oficial em português do Brasil
+# Docktor [PT-BR]
 
-Esta é a versão oficial em português do Brasil do [Docktor](https://github.com/marcospjr07/docktor), uma CLI somente leitura para diagnósticos de integridade de servidores Linux. `docktor scan` apresenta os indicadores do host como texto no terminal por padrão. Use `docktor scan --json` para obter uma saída legível por máquinas em automações.
+Esta é a edição [PT-BR] do [Docktor](https://github.com/marcospjr07/docktor), uma CLI somente leitura para diagnósticos de integridade de servidores Linux. `docktor scan` apresenta os indicadores do host como texto no terminal por padrão. Use `docktor scan --json` para obter uma saída legível por máquinas em automações.
 
 ## Exemplo
 
@@ -91,7 +91,7 @@ make check
 
 ## Versão em inglês
 
-Novas funcionalidades nascem no [repositório upstream em inglês](https://github.com/marcospjr07/docktor) e são sincronizadas para esta edição oficial em português do Brasil. A edição PT-BR preserva a arquitetura, o comportamento e o contrato JSON estrutural do upstream.
+Novas funcionalidades nascem no [repositório upstream em inglês](https://github.com/marcospjr07/docktor) e são sincronizadas para esta edição [PT-BR]. A edição [PT-BR] preserva a arquitetura, o comportamento e o contrato JSON estrutural do upstream.
 
 ## Roteiro
 
