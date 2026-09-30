@@ -1,4 +1,4 @@
-# Docktor [pt-br]
+# 🩺 Docktor [pt-br]
 
 Esta é a edição em português do [Docktor](https://github.com/marcospjr07/docktor), uma ferramenta de linha de comando (CLI) para diagnosticar o funcionamento de servidores Linux em modo somente leitura. `docktor scan` apresenta os indicadores do servidor em formato de texto no terminal por padrão. Use `docktor scan --json` para obter uma saída estruturada para uso em automações.
 
