@@ -76,14 +76,15 @@ func TestPackagesUpgradeCountsAndUnusualSimulations(t *testing.T) {
 		{"removals not counted", 12, 0, 3, 0, "12 atualizações disponíveis; a simulação inclui remoções"},
 		{"only removals", 0, 0, 2, 0, "nenhuma atualização listada; a simulação inclui remoções"},
 		{"only new packages", 0, 2, 0, 0, "nenhuma atualização listada; a simulação inclui novos pacotes"},
-		{"kept back", 0, 0, 0, 4, "nenhuma atualização listada; 4 mantidos na versão atual"},
-		{"upgrades and kept back", 10, 1, 0, 2, "10 atualizações disponíveis; 2 mantidos na versão atual"},
+		{"one kept back", 0, 0, 0, 1, "nenhuma atualização listada; 1 sem atualização"},
+		{"kept back", 0, 0, 0, 4, "nenhuma atualização listada; 4 sem atualização"},
+		{"upgrades and kept back", 10, 1, 0, 2, "10 atualizações disponíveis; 2 sem atualização"},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			c := packagesFixture(t, aptSummaryFixture(tt.upgraded, tt.installed, tt.removed, tt.kept))
 			got := c.Run(context.Background())
-			want := tt.message + "; atualidade dos metadados de pacotes desconhecida"
+			want := tt.message + "; não foi possível confirmar se os metadados dos pacotes estão atualizados"
 			if got.Status != check.StatusWarn || got.Message != want {
 				t.Fatalf("got %#v; want WARN %q", got, want)
 			}
@@ -120,7 +121,7 @@ func TestPackagesLookupErrorsSkipAPT(t *testing.T) {
 	}{
 		{&exec.Error{Name: "apt-get", Err: exec.ErrNotFound}, "nenhum gerenciador de pacotes compatível encontrado"},
 		{os.ErrNotExist, "nenhum gerenciador de pacotes compatível encontrado"},
-		{os.ErrPermission, "busca pelo APT indisponível"},
+		{os.ErrPermission, "não foi possível localizar o executável do APT"},
 	} {
 		c := packagesCheck{lookPath: func(string) (string, error) { return "", tt.err }}
 		got := c.Run(context.Background())
@@ -137,10 +138,10 @@ func TestPackagesQueryErrorsAndStderrCannotProducePASS(t *testing.T) {
 		err     error
 		message string
 	}{
-		{"exit error", aptCommandOutput{stdout: []byte(aptSummaryFixture(0, 0, 0, 0))}, errors.New("exit status 100"), "consulta APT indisponível"},
-		{"stderr", aptCommandOutput{stdout: []byte(aptSummaryFixture(0, 0, 0, 0)), stderr: []byte("warning")}, nil, "a consulta APT relatou avisos"},
-		{"output limit", aptCommandOutput{}, errAPTOutputLimit, "saída da consulta APT grande demais"},
-		{"oversized injected output", aptCommandOutput{stdout: []byte(strings.Repeat("x", maxAPTStdout+1))}, nil, "saída da consulta APT grande demais"},
+		{"exit error", aptCommandOutput{stdout: []byte(aptSummaryFixture(0, 0, 0, 0))}, errors.New("exit status 100"), "consulta ao APT indisponível"},
+		{"stderr", aptCommandOutput{stdout: []byte(aptSummaryFixture(0, 0, 0, 0)), stderr: []byte("warning")}, nil, "a consulta ao APT relatou avisos"},
+		{"output limit", aptCommandOutput{}, errAPTOutputLimit, "a saída da consulta ao APT excedeu o limite de tamanho"},
+		{"oversized injected output", aptCommandOutput{stdout: []byte(strings.Repeat("x", maxAPTStdout+1))}, nil, "a saída da consulta ao APT excedeu o limite de tamanho"},
 	} {
 		t.Run(tt.name, func(t *testing.T) {
 			c := packagesFixture(t, "")
@@ -176,9 +177,9 @@ func TestPackagesMetadataNeverTrustsRecentStamp(t *testing.T) {
 				c := packagesFixture(t, aptSummaryFixture(count, 0, 0, 0))
 				c.stat = func(string) (os.FileInfo, error) { return tt.stamp, tt.err }
 				got := c.Run(context.Background())
-				wantSuffix := "; atualidade dos metadados de pacotes desconhecida"
+				wantSuffix := "; não foi possível confirmar se os metadados dos pacotes estão atualizados"
 				if tt.old {
-					wantSuffix = "; registro de atualização do APT com mais de 24h"
+					wantSuffix = "; registro de atualização dos índices do APT com mais de 24 h"
 				}
 				if got.Status != check.StatusWarn || !strings.HasSuffix(got.Message, wantSuffix) {
 					t.Fatalf("got %#v for %d updates; want WARN with %q", got, count, wantSuffix)
@@ -197,7 +198,7 @@ func TestPackagesTimeoutAndCancellation(t *testing.T) {
 			return aptCommandOutput{stdout: []byte(aptSummaryFixture(0, 0, 0, 0))}, nil
 		}
 		got := c.Run(context.Background())
-		if got.Status != check.StatusWarn || got.Message != "a consulta APT excedeu o tempo limite" {
+		if got.Status != check.StatusWarn || got.Message != "a consulta ao APT excedeu o tempo limite" {
 			t.Fatalf("got %#v", got)
 		}
 	})

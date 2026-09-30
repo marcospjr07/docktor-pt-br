@@ -105,13 +105,13 @@ func (c dockerCheck) probe(ctx context.Context) check.Result {
 		return dockerWarning("resposta HTTP local do Docker inválida")
 	}
 	if len(data) > maxDockerVersionBody {
-		return dockerWarning("resposta local da versão do Docker grande demais")
+		return dockerWarning("a resposta de versão do Docker local excedeu o limite de tamanho")
 	}
 	var payload struct {
 		Version string `json:"Version"`
 	}
 	if err := json.Unmarshal(data, &payload); err != nil {
-		return dockerWarning("JSON local da versão do Docker inválido")
+		return dockerWarning("JSON da resposta de versão do Docker local inválido")
 	}
 	version := strings.TrimSpace(payload.Version)
 	if version == "" {

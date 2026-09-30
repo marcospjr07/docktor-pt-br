@@ -47,8 +47,8 @@ func TestSSHCheckPolicies(t *testing.T) {
 		{"root enabled", "PermitRootLogin yes\nPasswordAuthentication no\n", "login de root ativado; autenticação por senha desativada", check.StatusWarn},
 		{"password enabled", "PermitRootLogin no\nPasswordAuthentication yes\n", "login de root desativado; autenticação por senha ativada", check.StatusWarn},
 		{"both permissive", "PermitRootLogin yes\nPasswordAuthentication yes\n", "login de root ativado; autenticação por senha ativada", check.StatusWarn},
-		{"one unknown", "PermitRootLogin no\n", "login de root desativado; autenticação por senha desconhecida", check.StatusWarn},
-		{"both unknown", "# no explicit policy\n", "login de root desconhecido; autenticação por senha desconhecida", check.StatusWarn},
+		{"one unknown", "PermitRootLogin no\n", "login de root desativado; configuração de autenticação por senha desconhecida", check.StatusWarn},
+		{"both unknown", "# no explicit policy\n", "configuração de login de root desconhecida; configuração de autenticação por senha desconhecida", check.StatusWarn},
 		{"restricted root", "PermitRootLogin prohibit-password\nPasswordAuthentication no\n", "login de root limitado a métodos sem senha; autenticação por senha desativada", check.StatusWarn},
 		{"forced commands", "PermitRootLogin forced-commands-only\nPasswordAuthentication no\n", "login de root limitado a comandos forçados; autenticação por senha desativada", check.StatusWarn},
 		{"deprecated alias", "PermitRootLogin without-password\nPasswordAuthentication no\n", "login de root limitado a métodos sem senha; autenticação por senha desativada", check.StatusWarn},
@@ -183,11 +183,11 @@ func TestSSHCheckUnavailableAndAmbiguousConfig(t *testing.T) {
 			}
 			return readSSHFile(ctx, path)
 		}
-		assertSSHResult(t, c.Run(context.Background()), check.StatusWarn, "não foi possível ler o Include do SSH")
+		assertSSHResult(t, c.Run(context.Background()), check.StatusWarn, "não foi possível ler um arquivo incluído por Include no SSH")
 	})
 	t.Run("include cycle", func(t *testing.T) {
 		c := sshFixture(t, "Include a.conf\nPermitRootLogin no\nPasswordAuthentication no\n", map[string]string{"a.conf": "Include b.conf\n", "b.conf": "Include a.conf\n"})
-		assertSSHResult(t, c.Run(context.Background()), check.StatusWarn, "ciclo de Include do SSH detectado")
+		assertSSHResult(t, c.Run(context.Background()), check.StatusWarn, "ciclo de inclusão de arquivos por Include no SSH detectado")
 	})
 	t.Run("wildcard directory unsupported", func(t *testing.T) {
 		c := sshFixture(t, "Include */policy.conf\nPermitRootLogin no\nPasswordAuthentication no\n", nil)

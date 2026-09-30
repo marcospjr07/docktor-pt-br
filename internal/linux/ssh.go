@@ -74,9 +74,9 @@ func (c sshCheck) Run(ctx context.Context) check.Result {
 		case errors.Is(err, errSSHMainRead):
 			return sshWarning("configuração do servidor SSH ilegível")
 		case errors.Is(err, errSSHIncludeRead):
-			return sshWarning("não foi possível ler o Include do SSH")
+			return sshWarning("não foi possível ler um arquivo incluído por Include no SSH")
 		case errors.Is(err, errSSHIncludeLoop):
-			return sshWarning("ciclo de Include do SSH detectado")
+			return sshWarning("ciclo de inclusão de arquivos por Include no SSH detectado")
 		case errors.Is(err, errSSHLimit):
 			return sshWarning("a configuração SSH excede o limite de inspeção")
 		default:
@@ -110,7 +110,7 @@ func rootPolicyMessage(value string) string {
 	case "conditional":
 		return "login de root condicional"
 	default:
-		return "login de root desconhecido"
+		return "configuração de login de root desconhecida"
 	}
 }
 
@@ -123,7 +123,7 @@ func passwordPolicyMessage(value string) string {
 	case "conditional":
 		return "autenticação por senha condicional"
 	default:
-		return "autenticação por senha desconhecida"
+		return "configuração de autenticação por senha desconhecida"
 	}
 }
 

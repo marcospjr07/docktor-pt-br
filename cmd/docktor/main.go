@@ -70,9 +70,9 @@ func run(ctx context.Context, args []string, stdout, stderr io.Writer, scanFn fu
 }
 
 func writeHelp(w io.Writer) {
-	fmt.Fprint(w, "O Docktor lê indicadores de integridade de servidores Linux.\n\nUso:\n  docktor scan [--json]\n  docktor --help\n\nComandos:\n  scan    Executa diagnósticos de integridade somente leitura\n")
+	fmt.Fprint(w, "O Docktor consulta indicadores de funcionamento de servidores Linux.\n\nUso:\n  docktor scan [--json]\n  docktor --help\n\nComandos:\n  scan    Executa diagnósticos em modo somente leitura\n")
 }
 
 func writeScanHelp(w io.Writer) {
-	fmt.Fprint(w, "Uso: docktor scan [--json]\n\nExecuta diagnósticos de integridade somente leitura no Linux e exibe um resumo.\n\nOpções:\n  --json  Escreve um relatório JSON em vez da saída de terminal\n  --help  Exibe a ajuda do comando\n")
+	fmt.Fprint(w, "Uso: docktor scan [--json]\n\nExecuta diagnósticos de servidores Linux em modo somente leitura e exibe um resumo.\n\nOpções:\n  --json  Escreve um relatório JSON em vez da saída de terminal\n  --help  Exibe a ajuda do comando\n")
 }

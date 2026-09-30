@@ -62,7 +62,7 @@ func (c dockerCheck) socketActivationWarning(ctx context.Context) (check.Result,
 		return check.Result{}, false
 	}
 	// An unknown unit state cannot rule out activation, so skip the connection.
-	unknown := dockerWarning("estado do serviço local do Docker indisponível; teste ignorado para evitar a ativação do socket")
+	unknown := dockerWarning("estado do serviço local do Docker indisponível; consulta não realizada para evitar a ativação do serviço pelo socket")
 	if c.scope == dockerUnknownSystemd || c.unitState == nil {
 		return unknown, true
 	}
@@ -90,9 +90,9 @@ func (c dockerCheck) socketActivationWarning(ctx context.Context) (check.Result,
 	case "active":
 		return check.Result{}, false
 	case "inactive", "failed":
-		return dockerWarning("o daemon local do Docker não está em execução; teste ignorado para evitar a ativação do socket"), true
+		return dockerWarning("o daemon local do Docker não está em execução; consulta não realizada para evitar a ativação do serviço pelo socket"), true
 	case "activating", "deactivating", "reloading":
-		return dockerWarning("o serviço local do Docker está mudando de estado; teste ignorado para evitar a ativação do socket"), true
+		return dockerWarning("o serviço local do Docker está mudando de estado; consulta não realizada para evitar a ativação do serviço pelo socket"), true
 	default:
 		return unknown, true
 	}
