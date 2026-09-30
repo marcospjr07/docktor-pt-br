@@ -6,7 +6,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/marcospjr07/docktor/internal/check"
+	"github.com/marcospjr07/docktor-pt-br/internal/check"
 )
 
 func TestParseOSRelease(t *testing.T) {
@@ -63,7 +63,7 @@ func TestOSCheckFallsBackAndWarnsWhenFilesAreMissing(t *testing.T) {
 
 	c.readFile = func(string) ([]byte, error) { return nil, errors.New("missing") }
 	result = c.Run(context.Background())
-	if result.Status != check.StatusWarn || !strings.Contains(result.Message, "unavailable") {
+	if result.Status != check.StatusWarn || !strings.Contains(result.Message, "indisponível") {
 		t.Fatalf("expected an unavailable warning, got %+v", result)
 	}
 }

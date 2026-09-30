@@ -1,6 +1,6 @@
 package linux
 
-import "github.com/marcospjr07/docktor/internal/check"
+import "github.com/marcospjr07/docktor-pt-br/internal/check"
 
 func statusForPercent(percent float64) check.Status {
 	switch {

@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"io"
 
-	"github.com/marcospjr07/docktor/internal/check"
+	"github.com/marcospjr07/docktor-pt-br/internal/check"
 )
 
 // Keep the JSON contract separate from the check model so changes to internal

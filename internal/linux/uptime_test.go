@@ -6,7 +6,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/marcospjr07/docktor/internal/check"
+	"github.com/marcospjr07/docktor-pt-br/internal/check"
 )
 
 func TestParseAndFormatUptime(t *testing.T) {
@@ -14,7 +14,7 @@ func TestParseAndFormatUptime(t *testing.T) {
 	if err != nil || got != 90061*time.Second+500*time.Millisecond {
 		t.Fatalf("parseUptime() = %v, %v", got, err)
 	}
-	if formatted := formatUptime(got); formatted != "1d 1h 1m" {
+	if formatted := formatUptime(got); formatted != "1d 1h 1min" {
 		t.Fatalf("formatUptime() = %q", formatted)
 	}
 	for _, input := range []string{"", "NaN 0", "-1 0", "bogus 0", "1000000000000 0"} {

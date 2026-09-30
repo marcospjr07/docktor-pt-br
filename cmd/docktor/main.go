@@ -6,9 +6,9 @@ import (
 	"io"
 	"os"
 
-	"github.com/marcospjr07/docktor/internal/check"
-	"github.com/marcospjr07/docktor/internal/linux"
-	"github.com/marcospjr07/docktor/internal/reporter"
+	"github.com/marcospjr07/docktor-pt-br/internal/check"
+	"github.com/marcospjr07/docktor-pt-br/internal/linux"
+	"github.com/marcospjr07/docktor-pt-br/internal/reporter"
 )
 
 func main() {
@@ -28,7 +28,7 @@ func run(ctx context.Context, args []string, stdout, stderr io.Writer, scanFn fu
 	switch args[0] {
 	case "--help", "-h", "help":
 		if len(args) != 1 {
-			fmt.Fprintf(stderr, "docktor: unexpected argument %q\n", args[1])
+			fmt.Fprintf(stderr, "docktor: argumento inesperado %q\n", args[1])
 			writeHelp(stderr)
 			return 2
 		}
@@ -43,7 +43,7 @@ func run(ctx context.Context, args []string, stdout, stderr io.Writer, scanFn fu
 			case (arg == "--help" || arg == "-h") && !help:
 				help = true
 			default:
-				fmt.Fprintf(stderr, "docktor scan: unexpected argument %q\n", arg)
+				fmt.Fprintf(stderr, "docktor scan: argumento inesperado %q\n", arg)
 				writeScanHelp(stderr)
 				return 2
 			}
@@ -58,21 +58,21 @@ func run(ctx context.Context, args []string, stdout, stderr io.Writer, scanFn fu
 			writeReport = reporter.WriteJSON
 		}
 		if err := writeReport(stdout, report); err != nil {
-			fmt.Fprintf(stderr, "docktor: cannot write report: %v\n", err)
+			fmt.Fprintf(stderr, "docktor: não foi possível escrever o relatório: %v\n", err)
 			return 1
 		}
 		return 0
 	default:
-		fmt.Fprintf(stderr, "docktor: unknown command %q\n", args[0])
+		fmt.Fprintf(stderr, "docktor: comando desconhecido %q\n", args[0])
 		writeHelp(stderr)
 		return 2
 	}
 }
 
 func writeHelp(w io.Writer) {
-	fmt.Fprint(w, "Docktor reads Linux server health indicators.\n\nUsage:\n  docktor scan [--json]\n  docktor --help\n\nCommands:\n  scan    Run read-only health diagnostics\n")
+	fmt.Fprint(w, "O Docktor lê indicadores de integridade de servidores Linux.\n\nUso:\n  docktor scan [--json]\n  docktor --help\n\nComandos:\n  scan    Executa diagnósticos de integridade somente leitura\n")
 }
 
 func writeScanHelp(w io.Writer) {
-	fmt.Fprint(w, "Usage: docktor scan [--json]\n\nRun read-only Linux health diagnostics and print a summary.\n\nOptions:\n  --json  Write a JSON report instead of terminal output\n  --help  Show command help\n")
+	fmt.Fprint(w, "Uso: docktor scan [--json]\n\nExecuta diagnósticos de integridade somente leitura no Linux e exibe um resumo.\n\nOpções:\n  --json  Escreve um relatório JSON em vez da saída de terminal\n  --help  Exibe a ajuda do comando\n")
 }

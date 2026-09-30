@@ -76,24 +76,35 @@ func (r Runner) Run(ctx context.Context) Report {
 }
 
 func runOne(ctx context.Context, diagnostic Check) (result Result) {
-	name := "Check"
-	result = Result{Name: name, Status: StatusWarn, Message: "check could not complete"}
+	name := "Verificação"
+	result = Result{Name: name, Status: StatusWarn, Message: "a verificação não pôde ser concluída"}
 	defer func() {
 		if recover() != nil {
-			result = Result{Name: name, Status: StatusWarn, Message: "check could not complete"}
+			result = Result{Name: name, Status: StatusWarn, Message: "a verificação não pôde ser concluída"}
 		}
 	}()
 	name = diagnostic.Name()
 	result.Name = name
 	if err := ctx.Err(); err != nil {
-		result.Message = "scan interrupted: " + err.Error()
+		result.Message = "varredura interrompida: " + contextErrorMessage(err)
 		return result
 	}
 	result = diagnostic.Run(ctx)
 	result.Name = name
 	if result.Status != StatusPass && result.Status != StatusWarn && result.Status != StatusFail {
 		result.Status = StatusWarn
-		result.Message = "check returned an invalid status"
+		result.Message = "a verificação retornou um status inválido"
 	}
 	return result
+}
+
+func contextErrorMessage(err error) string {
+	switch err {
+	case context.Canceled:
+		return "contexto cancelado"
+	case context.DeadlineExceeded:
+		return "prazo do contexto excedido"
+	default:
+		return err.Error()
+	}
 }

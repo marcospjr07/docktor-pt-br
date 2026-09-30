@@ -7,7 +7,7 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/marcospjr07/docktor/internal/check"
+	"github.com/marcospjr07/docktor-pt-br/internal/check"
 )
 
 type memoryCheck struct {
@@ -19,7 +19,7 @@ type memoryStats struct {
 	availableKB uint64
 }
 
-func (memoryCheck) Name() string { return "Memory" }
+func (memoryCheck) Name() string { return "Memória" }
 
 func (c memoryCheck) Run(ctx context.Context) check.Result {
 	if result, interrupted := contextWarning(ctx); interrupted {
@@ -27,17 +27,17 @@ func (c memoryCheck) Run(ctx context.Context) check.Result {
 	}
 	data, err := c.readFile("/proc/meminfo")
 	if err != nil {
-		return check.Result{Status: check.StatusWarn, Message: "unavailable: " + err.Error()}
+		return check.Result{Status: check.StatusWarn, Message: "indisponível: " + err.Error()}
 	}
 	stats, err := parseMeminfo(data)
 	if err != nil {
-		return check.Result{Status: check.StatusWarn, Message: "unavailable: " + err.Error()}
+		return check.Result{Status: check.StatusWarn, Message: "indisponível: " + err.Error()}
 	}
 	usedKB := stats.totalKB - stats.availableKB
 	percent := 100 * float64(usedKB) / float64(stats.totalKB)
 	return check.Result{
 		Status: statusForPercent(percent),
-		Message: fmt.Sprintf("%.1f / %.1f GiB used (%.1f%%)",
+		Message: fmt.Sprintf("%.1f / %.1f GiB em uso (%.1f%%)",
 			float64(usedKB)/(1024*1024), float64(stats.totalKB)/(1024*1024), percent),
 	}
 }
@@ -52,11 +52,11 @@ func parseMeminfo(data []byte) (memoryStats, error) {
 		}
 		fields := strings.Fields(raw)
 		if len(fields) != 2 || fields[1] != "kB" {
-			return memoryStats{}, fmt.Errorf("invalid %s entry", key)
+			return memoryStats{}, fmt.Errorf("entrada %s inválida", key)
 		}
 		value, err := strconv.ParseUint(fields[0], 10, 64)
 		if err != nil {
-			return memoryStats{}, fmt.Errorf("invalid %s value: %w", key, err)
+			return memoryStats{}, fmt.Errorf("valor %s inválido: %w", key, err)
 		}
 		if key == "MemTotal" {
 			stats.totalKB = value
@@ -67,10 +67,10 @@ func parseMeminfo(data []byte) (memoryStats, error) {
 		}
 	}
 	if !haveTotal || !haveAvailable {
-		return memoryStats{}, errors.New("missing MemTotal or MemAvailable")
+		return memoryStats{}, errors.New("MemTotal ou MemAvailable ausente")
 	}
 	if stats.totalKB == 0 || stats.availableKB > stats.totalKB {
-		return memoryStats{}, errors.New("inconsistent memory totals")
+		return memoryStats{}, errors.New("totais de memória inconsistentes")
 	}
 	return stats, nil
 }

@@ -1,9 +1,9 @@
-# Architecture and contribution guardrails
+# Diretrizes de arquitetura e contribuição
 
-- `cmd/docktor` owns CLI argument handling and exit codes. Completed scans exit 0 regardless of health findings; operational or report output errors exit 1, and CLI usage errors exit 2.
-- `internal/check` defines `Status`, `Result`, `Check`, the ordered runner, and summary counts. Keep this package free of Linux and terminal details.
-- `internal/linux` contains read-only Linux checks. `internal/reporter` formats the resulting report. Add a new check through `linux.Checks()` without coupling it to the reporter.
-- Checks may read host data and query read-only system APIs. They must not write files, change configuration, restart services, or invoke commands with side effects.
-- Pass `context.Context` through the runner. Treat unavailable or malformed system data as a warning and continue other checks. Inject small file-reading or stat functions in tests instead of relying on the host.
-- Keep the initial foundation standard-library-only. Add dependencies only as an explicit project decision.
-- Run `make check` with Go 1.27 before merging. Keep tests focused on parsing, calculations, reporting, and CLI behavior.
+- `cmd/docktor` é responsável pelo tratamento dos argumentos da CLI e pelos códigos de saída. Varreduras concluídas retornam 0 independentemente dos achados de integridade; erros operacionais ou de escrita do relatório retornam 1, e erros de uso da CLI retornam 2.
+- `internal/check` define `Status`, `Result`, `Check`, o runner ordenado e as contagens do resumo. Mantenha esse pacote livre de detalhes do Linux e do terminal.
+- `internal/linux` contém verificações somente leitura do Linux. `internal/reporter` formata o relatório resultante. Adicione uma nova verificação por meio de `linux.Checks()`, sem acoplá-la ao reporter.
+- As verificações podem ler dados do host e consultar APIs de sistema somente leitura. Elas não devem escrever arquivos, alterar configurações, reiniciar serviços nem invocar comandos com efeitos colaterais.
+- Propague `context.Context` pelo runner. Trate dados de sistema indisponíveis ou malformados como aviso e continue as outras verificações. Injete pequenas funções de leitura de arquivo ou stat nos testes, em vez de depender do host.
+- Mantenha a base inicial somente com a biblioteca padrão. Adicione dependências apenas como uma decisão explícita do projeto.
+- Execute `make check` com Go 1.27 antes de integrar alterações. Mantenha os testes focados em parsing, cálculos, relatórios e comportamento da CLI.

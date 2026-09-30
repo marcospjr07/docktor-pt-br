@@ -9,7 +9,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/marcospjr07/docktor/internal/check"
+	"github.com/marcospjr07/docktor-pt-br/internal/check"
 )
 
 const firewallQueryTimeout = 3 * time.Second
@@ -62,10 +62,10 @@ func (c firewallCheck) Run(ctx context.Context) check.Result {
 		status = check.StatusPass
 	}
 	if ufw == firewallAbsent && firewalld == firewallAbsent {
-		return check.Result{Status: status, Message: "no supported firewall tooling found"}
+		return check.Result{Status: status, Message: "nenhuma ferramenta de firewall compatível encontrada"}
 	}
 	if ufw == firewallActive && firewalld == firewallActive {
-		return check.Result{Status: status, Message: "UFW and firewalld active"}
+		return check.Result{Status: status, Message: "UFW e firewalld ativos"}
 	}
 
 	var messages []string
@@ -155,13 +155,13 @@ func firewallLookupState(err error) firewallState {
 func firewallStateMessage(name string, state firewallState) string {
 	switch state {
 	case firewallActive:
-		return name + " active"
+		return name + " ativo"
 	case firewallInactive:
-		return name + " installed but inactive"
+		return name + " instalado, mas inativo"
 	case firewallFailed:
-		return name + " reported a startup failure"
+		return name + " relatou uma falha na inicialização"
 	default:
-		return name + " state unavailable"
+		return "estado do " + name + " indisponível"
 	}
 }
 

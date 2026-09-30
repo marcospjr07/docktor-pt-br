@@ -5,7 +5,7 @@ import (
 	"errors"
 	"testing"
 
-	"github.com/marcospjr07/docktor/internal/check"
+	"github.com/marcospjr07/docktor-pt-br/internal/check"
 )
 
 func TestParseMeminfo(t *testing.T) {

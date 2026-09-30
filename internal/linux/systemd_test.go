@@ -10,7 +10,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/marcospjr07/docktor/internal/check"
+	"github.com/marcospjr07/docktor-pt-br/internal/check"
 )
 
 var failedServiceQuery = []string{
@@ -24,11 +24,11 @@ func TestSystemdCheckFailedServices(t *testing.T) {
 		status  check.Status
 		message string
 	}{
-		{"none", "[]", check.StatusPass, "no failed service units"},
-		{"empty with whitespace", " \n[]\n", check.StatusPass, "no failed service units"},
-		{"one", `[{"unit":"nginx.service","active":"failed","description":"ignored"}]`, check.StatusFail, "1 failed service: nginx.service"},
-		{"several sorted", `[{"unit":"redis.service","active":"failed"},{"unit":"nginx.service","active":"failed"},{"unit":"postgresql.service","active":"failed"}]`, check.StatusFail, "3 failed services: nginx.service, postgresql.service, redis.service"},
-		{"many with duplicates", `[{"unit":"z.service","active":"failed"},{"unit":"b.service","active":"failed"},{"unit":"a.service","active":"failed"},{"unit":"f.service","active":"failed"},{"unit":"e.service","active":"failed"},{"unit":"d.service","active":"failed"},{"unit":"a.service","active":"failed"}]`, check.StatusFail, "6 failed services: a.service, b.service, d.service (+3 more)"},
+		{"none", "[]", check.StatusPass, "nenhuma unidade de serviço com falha"},
+		{"empty with whitespace", " \n[]\n", check.StatusPass, "nenhuma unidade de serviço com falha"},
+		{"one", `[{"unit":"nginx.service","active":"failed","description":"ignored"}]`, check.StatusFail, "1 serviço com falha: nginx.service"},
+		{"several sorted", `[{"unit":"redis.service","active":"failed"},{"unit":"nginx.service","active":"failed"},{"unit":"postgresql.service","active":"failed"}]`, check.StatusFail, "3 serviços com falha: nginx.service, postgresql.service, redis.service"},
+		{"many with duplicates", `[{"unit":"z.service","active":"failed"},{"unit":"b.service","active":"failed"},{"unit":"a.service","active":"failed"},{"unit":"f.service","active":"failed"},{"unit":"e.service","active":"failed"},{"unit":"d.service","active":"failed"},{"unit":"a.service","active":"failed"}]`, check.StatusFail, "6 serviços com falha: a.service, b.service, d.service (+3 a mais)"},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -64,7 +64,7 @@ func TestSystemdCheckMalformedOutputWarns(t *testing.T) {
 				return []byte(output), nil
 			}}
 			got := c.Run(context.Background())
-			if got.Status != check.StatusWarn || got.Message != "invalid systemd service data" {
+			if got.Status != check.StatusWarn || got.Message != "dados de serviços do systemd inválidos" {
 				t.Fatalf("got %#v; want invalid data warning", got)
 			}
 		})
@@ -77,10 +77,10 @@ func TestSystemdCheckQueryErrorsWarn(t *testing.T) {
 		err     error
 		message string
 	}{
-		{"systemctl missing", &exec.Error{Name: "systemctl", Err: exec.ErrNotFound}, "systemctl not found"},
-		{"binary missing", os.ErrNotExist, "systemctl not found"},
-		{"query failed", errors.New("system manager unavailable"), "cannot query systemd services"},
-		{"deadline error", context.DeadlineExceeded, "systemd service query timed out"},
+		{"systemctl missing", &exec.Error{Name: "systemctl", Err: exec.ErrNotFound}, "systemctl não encontrado"},
+		{"binary missing", os.ErrNotExist, "systemctl não encontrado"},
+		{"query failed", errors.New("system manager unavailable"), "não foi possível consultar os serviços do systemd"},
+		{"deadline error", context.DeadlineExceeded, "a consulta de serviços do systemd excedeu o tempo limite"},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -107,7 +107,7 @@ func TestSystemdCheckTimeout(t *testing.T) {
 		},
 	}
 	got := c.Run(context.Background())
-	if got.Status != check.StatusWarn || got.Message != "systemd service query timed out" {
+	if got.Status != check.StatusWarn || got.Message != "a consulta de serviços do systemd excedeu o tempo limite" {
 		t.Fatalf("got %#v; want timeout warning", got)
 	}
 }
@@ -122,7 +122,7 @@ func TestSystemdCheckCancellation(t *testing.T) {
 		return []byte("[]"), ctx.Err()
 	}}
 	got := c.Run(ctx)
-	if got.Status != check.StatusWarn || !strings.Contains(got.Message, "scan interrupted") || calls != 1 {
+	if got.Status != check.StatusWarn || !strings.Contains(got.Message, "varredura interrompida") || calls != 1 {
 		t.Fatalf("got %#v after %d calls; want interrupted warning", got, calls)
 	}
 
@@ -134,7 +134,7 @@ func TestSystemdCheckCancellation(t *testing.T) {
 }
 
 func TestSystemdCheckRegistered(t *testing.T) {
-	want := []string{"OS", "Uptime", "Memory", "Root disk", "Systemd", "SSH", "Firewall", "Packages", "Docker"}
+	want := []string{"Sistema operacional", "Tempo ativo", "Memória", "Disco raiz", "Systemd", "SSH", "Firewall", "Pacotes", "Docker"}
 	checks := Checks()
 	names := make([]string, len(checks))
 	for i, diagnostic := range checks {

@@ -6,7 +6,7 @@ import (
 	"math"
 	"testing"
 
-	"github.com/marcospjr07/docktor/internal/check"
+	"github.com/marcospjr07/docktor-pt-br/internal/check"
 )
 
 func TestCalculateDiskUsage(t *testing.T) {

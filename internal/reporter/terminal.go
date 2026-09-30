@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"io"
 
-	"github.com/marcospjr07/docktor/internal/check"
+	"github.com/marcospjr07/docktor-pt-br/internal/check"
 )
 
 // WriteTerminal writes findings and a summary without terminal control codes.
@@ -16,8 +16,10 @@ func WriteTerminal(w io.Writer, report check.Report) error {
 			return err
 		}
 	}
-	_, err := fmt.Fprintf(w, "\nSummary: %d pass, %d warn, %d fail\n",
-		report.Summary.Passed, report.Summary.Warned, report.Summary.Failed)
+	_, err := fmt.Fprintf(w, "\nResumo: %d %s, %d %s, %d %s\n",
+		report.Summary.Passed, countLabel(report.Summary.Passed, "aprovado", "aprovados"),
+		report.Summary.Warned, countLabel(report.Summary.Warned, "aviso", "avisos"),
+		report.Summary.Failed, countLabel(report.Summary.Failed, "falha", "falhas"))
 	return err
 }
 
@@ -30,6 +32,13 @@ func statusDisplay(status check.Status) (string, string) {
 	case check.StatusFail:
 		return "✗", "FAIL"
 	default:
-		return "?", "UNKNOWN"
+		return "?", "DESCONHECIDO"
 	}
+}
+
+func countLabel(count int, singular, plural string) string {
+	if count == 1 {
+		return singular
+	}
+	return plural
 }

@@ -9,7 +9,7 @@ import (
 	"syscall"
 	"time"
 
-	"github.com/marcospjr07/docktor/internal/check"
+	"github.com/marcospjr07/docktor-pt-br/internal/check"
 )
 
 const dockerSystemdTimeout = 2 * time.Second
@@ -62,7 +62,7 @@ func (c dockerCheck) socketActivationWarning(ctx context.Context) (check.Result,
 		return check.Result{}, false
 	}
 	// An unknown unit state cannot rule out activation, so skip the connection.
-	unknown := dockerWarning("local Docker service state unavailable; probe skipped to avoid socket activation")
+	unknown := dockerWarning("estado do serviço local do Docker indisponível; teste ignorado para evitar a ativação do socket")
 	if c.scope == dockerUnknownSystemd || c.unitState == nil {
 		return unknown, true
 	}
@@ -90,9 +90,9 @@ func (c dockerCheck) socketActivationWarning(ctx context.Context) (check.Result,
 	case "active":
 		return check.Result{}, false
 	case "inactive", "failed":
-		return dockerWarning("local Docker daemon is not running; probe skipped to avoid socket activation"), true
+		return dockerWarning("o daemon local do Docker não está em execução; teste ignorado para evitar a ativação do socket"), true
 	case "activating", "deactivating", "reloading":
-		return dockerWarning("local Docker service is changing state; probe skipped to avoid socket activation"), true
+		return dockerWarning("o serviço local do Docker está mudando de estado; teste ignorado para evitar a ativação do socket"), true
 	default:
 		return unknown, true
 	}
@@ -110,7 +110,7 @@ func queryDockerUnitState(ctx context.Context, scope dockerSystemdScope, unit st
 	case dockerUserSystemd:
 		flag = "--user"
 	default:
-		return "", fmt.Errorf("invalid Docker systemd scope %d", scope)
+		return "", fmt.Errorf("escopo do systemd para Docker inválido: %d", scope)
 	}
 	output, err := run(ctx, flag, "show", "--property=ActiveState", "--value", "--no-pager", "--", unit)
 	if err != nil {
@@ -118,7 +118,7 @@ func queryDockerUnitState(ctx context.Context, scope dockerSystemdScope, unit st
 	}
 	state := strings.TrimSpace(string(output))
 	if state == "" || strings.ContainsAny(state, "\r\n") {
-		return "", fmt.Errorf("systemctl show %s returned an invalid state", unit)
+		return "", fmt.Errorf("systemctl show %s retornou um estado inválido", unit)
 	}
 	return state, nil
 }

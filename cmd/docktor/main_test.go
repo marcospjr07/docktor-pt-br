@@ -8,7 +8,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/marcospjr07/docktor/internal/check"
+	"github.com/marcospjr07/docktor-pt-br/internal/check"
 )
 
 func TestRunCompletedScanReturnsZeroForEveryFinding(t *testing.T) {
@@ -33,7 +33,7 @@ func TestRunCompletedScanReturnsZeroForEveryFinding(t *testing.T) {
 					t.Errorf("unexpected scan: calls=%d, stderr=%q", calls, stderr.String())
 				}
 				if len(args) == 1 {
-					if !strings.Contains(stdout.String(), "Summary:") {
+					if !strings.Contains(stdout.String(), "Resumo:") {
 						t.Errorf("default output is not terminal text: %q", stdout.String())
 					}
 					return
@@ -73,7 +73,7 @@ func TestRunHelpDoesNotScan(t *testing.T) {
 		if code := run(context.Background(), args, &stdout, &stderr, scanFn); code != 0 {
 			t.Errorf("run(%v) exit code = %d, want 0", args, code)
 		}
-		if !strings.Contains(stdout.String(), "Usage:") || !strings.Contains(stdout.String(), "--json") || stderr.Len() != 0 {
+		if !strings.Contains(stdout.String(), "Uso:") || !strings.Contains(stdout.String(), "--json") || stderr.Len() != 0 {
 			t.Errorf("run(%v) output: stdout=%q, stderr=%q", args, stdout.String(), stderr.String())
 		}
 	}
@@ -112,7 +112,7 @@ func TestRunReportWriteErrorIsReported(t *testing.T) {
 		if code := run(context.Background(), args, failingWriter{}, &stderr, scanFn); code != 1 {
 			t.Errorf("run(%v) exit code = %d, want 1", args, code)
 		}
-		if !strings.Contains(stderr.String(), "cannot write report: output unavailable") {
+		if !strings.Contains(stderr.String(), "não foi possível escrever o relatório: output unavailable") {
 			t.Errorf("missing report write error for %v: %q", args, stderr.String())
 		}
 	}

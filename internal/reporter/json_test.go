@@ -7,8 +7,8 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/marcospjr07/docktor/internal/check"
-	"github.com/marcospjr07/docktor/internal/reporter"
+	"github.com/marcospjr07/docktor-pt-br/internal/check"
+	"github.com/marcospjr07/docktor-pt-br/internal/reporter"
 )
 
 func TestWriteJSONContract(t *testing.T) {

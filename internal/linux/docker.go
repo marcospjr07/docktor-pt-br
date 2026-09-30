@@ -16,7 +16,7 @@ import (
 	"syscall"
 	"time"
 
-	"github.com/marcospjr07/docktor/internal/check"
+	"github.com/marcospjr07/docktor-pt-br/internal/check"
 )
 
 const (
@@ -56,15 +56,15 @@ func (c dockerCheck) Run(ctx context.Context) check.Result {
 			return interrupted
 		}
 		if timedOut {
-			result = dockerWarning("local daemon check timed out")
+			result = dockerWarning("a verificação do daemon local excedeu o tempo limite")
 		}
 	}
 
 	if _, err := c.lookPath("docker"); err != nil {
 		if errors.Is(err, exec.ErrNotFound) {
-			result.Message += "; Docker CLI not found"
+			result.Message += "; CLI do Docker não encontrada"
 		} else {
-			result.Message += "; Docker CLI unavailable"
+			result.Message += "; CLI do Docker indisponível"
 		}
 	}
 	return result
@@ -86,7 +86,7 @@ func (c dockerCheck) probe(ctx context.Context) check.Result {
 	}
 	request, err := http.NewRequestWithContext(ctx, http.MethodGet, "http://docker/version", nil)
 	if err != nil {
-		return dockerWarning("local Docker request unavailable")
+		return dockerWarning("requisição local ao Docker indisponível")
 	}
 	response, err := client.Do(request)
 	if err != nil {
@@ -94,55 +94,55 @@ func (c dockerCheck) probe(ctx context.Context) check.Result {
 	}
 	defer response.Body.Close()
 	if response.StatusCode != http.StatusOK {
-		return dockerWarning(fmt.Sprintf("local Docker API returned HTTP %d", response.StatusCode))
+		return dockerWarning(fmt.Sprintf("a API local do Docker retornou HTTP %d", response.StatusCode))
 	}
 
 	data, err := io.ReadAll(io.LimitReader(response.Body, maxDockerVersionBody+1))
 	if err != nil {
 		if dockerTimeout(err) {
-			return dockerWarning("local daemon check timed out")
+			return dockerWarning("a verificação do daemon local excedeu o tempo limite")
 		}
-		return dockerWarning("invalid local Docker HTTP response")
+		return dockerWarning("resposta HTTP local do Docker inválida")
 	}
 	if len(data) > maxDockerVersionBody {
-		return dockerWarning("local Docker version response too large")
+		return dockerWarning("resposta local da versão do Docker grande demais")
 	}
 	var payload struct {
 		Version string `json:"Version"`
 	}
 	if err := json.Unmarshal(data, &payload); err != nil {
-		return dockerWarning("invalid local Docker version JSON")
+		return dockerWarning("JSON local da versão do Docker inválido")
 	}
 	version := strings.TrimSpace(payload.Version)
 	if version == "" {
-		return dockerWarning("local Docker daemon version missing")
+		return dockerWarning("versão do daemon local do Docker ausente")
 	}
 	if len(version) > maxDockerVersionText || strings.IndexFunc(version, func(r rune) bool {
 		return r < '!' || r > '~'
 	}) >= 0 {
-		return dockerWarning("invalid local Docker daemon version")
+		return dockerWarning("versão do daemon local do Docker inválida")
 	}
-	return check.Result{Status: check.StatusPass, Message: "local daemon reachable (version " + version + ")"}
+	return check.Result{Status: check.StatusPass, Message: "daemon local acessível (versão " + version + ")"}
 }
 
 func dockerConnectionWarning(err error) check.Result {
 	switch {
 	case dockerTimeout(err):
-		return dockerWarning("local daemon check timed out")
+		return dockerWarning("a verificação do daemon local excedeu o tempo limite")
 	case errors.Is(err, os.ErrNotExist):
-		return dockerWarning("local Docker socket not found")
+		return dockerWarning("socket local do Docker não encontrado")
 	case errors.Is(err, os.ErrPermission), errors.Is(err, syscall.EACCES), errors.Is(err, syscall.EPERM):
-		return dockerWarning("local Docker socket access denied")
+		return dockerWarning("acesso ao socket local do Docker negado")
 	case errors.Is(err, syscall.ECONNREFUSED):
-		return dockerWarning("local Docker daemon unavailable (connection refused)")
+		return dockerWarning("daemon local do Docker indisponível (conexão recusada)")
 	case errors.Is(err, syscall.ENOTSOCK):
-		return dockerWarning("local Docker socket invalid")
+		return dockerWarning("socket local do Docker inválido")
 	}
 	var netErr *net.OpError
 	if errors.As(err, &netErr) {
-		return dockerWarning("local Docker daemon unavailable")
+		return dockerWarning("daemon local do Docker indisponível")
 	}
-	return dockerWarning("invalid local Docker HTTP response")
+	return dockerWarning("resposta HTTP local do Docker inválida")
 }
 
 func dockerTimeout(err error) bool {

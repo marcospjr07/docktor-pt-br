@@ -5,10 +5,10 @@ import (
 	"errors"
 	"fmt"
 
-	"github.com/marcospjr07/docktor/internal/check"
+	"github.com/marcospjr07/docktor-pt-br/internal/check"
 )
 
-var errInvalidFilesystem = errors.New("invalid filesystem statistics")
+var errInvalidFilesystem = errors.New("estatísticas do sistema de arquivos inválidas")
 
 type diskCheck struct {
 	statFS statFSFunc
@@ -20,7 +20,7 @@ type diskUsage struct {
 	percent  float64
 }
 
-func (diskCheck) Name() string { return "Root disk" }
+func (diskCheck) Name() string { return "Disco raiz" }
 
 func (c diskCheck) Run(ctx context.Context) check.Result {
 	if result, interrupted := contextWarning(ctx); interrupted {
@@ -28,15 +28,15 @@ func (c diskCheck) Run(ctx context.Context) check.Result {
 	}
 	stats, err := c.statFS("/")
 	if err != nil {
-		return check.Result{Status: check.StatusWarn, Message: "unavailable: " + err.Error()}
+		return check.Result{Status: check.StatusWarn, Message: "indisponível: " + err.Error()}
 	}
 	usage, err := calculateDiskUsage(stats)
 	if err != nil {
-		return check.Result{Status: check.StatusWarn, Message: "unavailable: " + err.Error()}
+		return check.Result{Status: check.StatusWarn, Message: "indisponível: " + err.Error()}
 	}
 	return check.Result{
 		Status:  statusForPercent(usage.percent),
-		Message: fmt.Sprintf("%.1f / %.1f GiB used (%.1f%%)", usage.usedGiB, usage.totalGiB, usage.percent),
+		Message: fmt.Sprintf("%.1f / %.1f GiB em uso (%.1f%%)", usage.usedGiB, usage.totalGiB, usage.percent),
 	}
 }
 

@@ -9,7 +9,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/marcospjr07/docktor/internal/check"
+	"github.com/marcospjr07/docktor-pt-br/internal/check"
 )
 
 func sshFixture(t *testing.T, main string, includes map[string]string) sshCheck {
@@ -43,18 +43,18 @@ func TestSSHCheckPolicies(t *testing.T) {
 		name, config, message string
 		status                check.Status
 	}{
-		{"hardened", "PermitRootLogin no\nPasswordAuthentication no\n", "root login disabled; password authentication disabled", check.StatusPass},
-		{"root enabled", "PermitRootLogin yes\nPasswordAuthentication no\n", "root login enabled; password authentication disabled", check.StatusWarn},
-		{"password enabled", "PermitRootLogin no\nPasswordAuthentication yes\n", "root login disabled; password authentication enabled", check.StatusWarn},
-		{"both permissive", "PermitRootLogin yes\nPasswordAuthentication yes\n", "root login enabled; password authentication enabled", check.StatusWarn},
-		{"one unknown", "PermitRootLogin no\n", "root login disabled; password authentication unknown", check.StatusWarn},
-		{"both unknown", "# no explicit policy\n", "root login unknown; password authentication unknown", check.StatusWarn},
-		{"restricted root", "PermitRootLogin prohibit-password\nPasswordAuthentication no\n", "root login limited to non-password methods; password authentication disabled", check.StatusWarn},
-		{"forced commands", "PermitRootLogin forced-commands-only\nPasswordAuthentication no\n", "root login limited to forced commands; password authentication disabled", check.StatusWarn},
-		{"deprecated alias", "PermitRootLogin without-password\nPasswordAuthentication no\n", "root login limited to non-password methods; password authentication disabled", check.StatusWarn},
-		{"comments whitespace and case", "\t# PermitRootLogin yes\n\tPeRmItRoOtLoGiN = No  # comment\n PasswordAuthentication\t=\tNO\n", "root login disabled; password authentication disabled", check.StatusPass},
-		{"quoted value", "PermitRootLogin \"no\"\nPasswordAuthentication 'no'\n", "root login disabled; password authentication disabled", check.StatusPass},
-		{"first global value wins", "PermitRootLogin no\nPasswordAuthentication no\nPermitRootLogin yes\nPasswordAuthentication yes\n", "root login disabled; password authentication disabled", check.StatusPass},
+		{"hardened", "PermitRootLogin no\nPasswordAuthentication no\n", "login de root desativado; autenticação por senha desativada", check.StatusPass},
+		{"root enabled", "PermitRootLogin yes\nPasswordAuthentication no\n", "login de root ativado; autenticação por senha desativada", check.StatusWarn},
+		{"password enabled", "PermitRootLogin no\nPasswordAuthentication yes\n", "login de root desativado; autenticação por senha ativada", check.StatusWarn},
+		{"both permissive", "PermitRootLogin yes\nPasswordAuthentication yes\n", "login de root ativado; autenticação por senha ativada", check.StatusWarn},
+		{"one unknown", "PermitRootLogin no\n", "login de root desativado; autenticação por senha desconhecida", check.StatusWarn},
+		{"both unknown", "# no explicit policy\n", "login de root desconhecido; autenticação por senha desconhecida", check.StatusWarn},
+		{"restricted root", "PermitRootLogin prohibit-password\nPasswordAuthentication no\n", "login de root limitado a métodos sem senha; autenticação por senha desativada", check.StatusWarn},
+		{"forced commands", "PermitRootLogin forced-commands-only\nPasswordAuthentication no\n", "login de root limitado a comandos forçados; autenticação por senha desativada", check.StatusWarn},
+		{"deprecated alias", "PermitRootLogin without-password\nPasswordAuthentication no\n", "login de root limitado a métodos sem senha; autenticação por senha desativada", check.StatusWarn},
+		{"comments whitespace and case", "\t# PermitRootLogin yes\n\tPeRmItRoOtLoGiN = No  # comment\n PasswordAuthentication\t=\tNO\n", "login de root desativado; autenticação por senha desativada", check.StatusPass},
+		{"quoted value", "PermitRootLogin \"no\"\nPasswordAuthentication 'no'\n", "login de root desativado; autenticação por senha desativada", check.StatusPass},
+		{"first global value wins", "PermitRootLogin no\nPasswordAuthentication no\nPermitRootLogin yes\nPasswordAuthentication yes\n", "login de root desativado; autenticação por senha desativada", check.StatusPass},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -74,14 +74,14 @@ func TestSSHCheckIncludesAndPrecedence(t *testing.T) {
 			main:     "Include policy.conf\nPasswordAuthentication no\n",
 			includes: map[string]string{"policy.conf": "PermitRootLogin no\n"},
 			status:   check.StatusPass,
-			message:  "root login disabled; password authentication disabled",
+			message:  "login de root desativado; autenticação por senha desativada",
 		},
 		{
 			name:     "relative include uses server config directory",
 			main:     "Include nested/outer.conf\nPasswordAuthentication no\n",
 			includes: map[string]string{"nested/outer.conf": "Include inner.conf\n", "inner.conf": "PermitRootLogin no\n"},
 			status:   check.StatusPass,
-			message:  "root login disabled; password authentication disabled",
+			message:  "login de root desativado; autenticação por senha desativada",
 		},
 		{
 			name: "glob sorts before applying first value",
@@ -91,7 +91,7 @@ func TestSSHCheckIncludesAndPrecedence(t *testing.T) {
 				"sshd_config.d/10.conf": "PermitRootLogin no\nPasswordAuthentication no\n",
 			},
 			status:  check.StatusPass,
-			message: "root login disabled; password authentication disabled",
+			message: "login de root desativado; autenticação por senha desativada",
 		},
 		{
 			name: "glob does not include hidden files",
@@ -101,40 +101,40 @@ func TestSSHCheckIncludesAndPrecedence(t *testing.T) {
 				"sshd_config.d/10.conf":  "PermitRootLogin yes\n",
 			},
 			status:  check.StatusWarn,
-			message: "root login enabled; password authentication disabled",
+			message: "login de root ativado; autenticação por senha desativada",
 		},
 		{
 			name:    "unmatched glob is valid",
 			main:    "Include sshd_config.d/*.conf\nPermitRootLogin no\nPasswordAuthentication no\n",
 			status:  check.StatusPass,
-			message: "root login disabled; password authentication disabled",
+			message: "login de root desativado; autenticação por senha desativada",
 		},
 		{
 			name:    "unmatched literal include is valid",
 			main:    "Include missing.conf\nPermitRootLogin no\nPasswordAuthentication no\n",
 			status:  check.StatusPass,
-			message: "root login disabled; password authentication disabled",
+			message: "login de root desativado; autenticação por senha desativada",
 		},
 		{
 			name:     "quoted include path",
 			main:     "Include \"policy files/root.conf\"\nPasswordAuthentication no\n",
 			includes: map[string]string{"policy files/root.conf": "PermitRootLogin no\n"},
 			status:   check.StatusPass,
-			message:  "root login disabled; password authentication disabled",
+			message:  "login de root desativado; autenticação por senha desativada",
 		},
 		{
 			name:     "include in Match is conditional",
 			main:     "PermitRootLogin no\nPasswordAuthentication no\nMatch User admin\n Include admin.conf\n",
 			includes: map[string]string{"admin.conf": "PermitRootLogin yes\n"},
 			status:   check.StatusWarn,
-			message:  "root login conditional; password authentication disabled",
+			message:  "login de root condicional; autenticação por senha desativada",
 		},
 		{
 			name:     "included Match does not leak into parent",
 			main:     "Include conditional.conf\nPermitRootLogin no\nPasswordAuthentication no\n",
 			includes: map[string]string{"conditional.conf": "Match User admin\n X11Forwarding no\n"},
 			status:   check.StatusPass,
-			message:  "root login disabled; password authentication disabled",
+			message:  "login de root desativado; autenticação por senha desativada",
 		},
 	}
 	for _, tt := range tests {
@@ -149,14 +149,14 @@ func TestSSHCheckMatchPolicy(t *testing.T) {
 		name, config, message string
 		status                check.Status
 	}{
-		{"root varies", "PermitRootLogin no\nPasswordAuthentication no\nMatch User admin\n PermitRootLogin yes\n", "root login conditional; password authentication disabled", check.StatusWarn},
-		{"password varies", "PermitRootLogin no\nPasswordAuthentication no\nMatch Address 192.0.2.*\n PasswordAuthentication yes\n", "root login disabled; password authentication conditional", check.StatusWarn},
-		{"irrelevant Match", "PermitRootLogin no\nPasswordAuthentication no\nMatch User admin\n X11Forwarding no\n", "root login disabled; password authentication disabled", check.StatusPass},
-		{"same Match policy", "PermitRootLogin no\nPasswordAuthentication no\nMatch User admin\n PermitRootLogin no\n PasswordAuthentication no\n", "root login disabled; password authentication disabled", check.StatusPass},
-		{"Match all overrides global", "PermitRootLogin yes\nPasswordAuthentication yes\nMatch all\n PermitRootLogin no\n PasswordAuthentication no\n", "root login disabled; password authentication disabled", check.StatusPass},
-		{"earlier Match overrides Match all", "PermitRootLogin no\nPasswordAuthentication no\nMatch User admin\n PermitRootLogin yes\nMatch all\n PermitRootLogin no\n", "root login conditional; password authentication disabled", check.StatusWarn},
-		{"first value in Match block wins", "PermitRootLogin no\nPasswordAuthentication no\nMatch User admin\n PermitRootLogin no\n PermitRootLogin yes\n", "root login disabled; password authentication disabled", check.StatusPass},
-		{"conditional with unknown global", "PermitRootLogin no\nMatch User admin\n PasswordAuthentication no\n", "root login disabled; password authentication conditional", check.StatusWarn},
+		{"root varies", "PermitRootLogin no\nPasswordAuthentication no\nMatch User admin\n PermitRootLogin yes\n", "login de root condicional; autenticação por senha desativada", check.StatusWarn},
+		{"password varies", "PermitRootLogin no\nPasswordAuthentication no\nMatch Address 192.0.2.*\n PasswordAuthentication yes\n", "login de root desativado; autenticação por senha condicional", check.StatusWarn},
+		{"irrelevant Match", "PermitRootLogin no\nPasswordAuthentication no\nMatch User admin\n X11Forwarding no\n", "login de root desativado; autenticação por senha desativada", check.StatusPass},
+		{"same Match policy", "PermitRootLogin no\nPasswordAuthentication no\nMatch User admin\n PermitRootLogin no\n PasswordAuthentication no\n", "login de root desativado; autenticação por senha desativada", check.StatusPass},
+		{"Match all overrides global", "PermitRootLogin yes\nPasswordAuthentication yes\nMatch all\n PermitRootLogin no\n PasswordAuthentication no\n", "login de root desativado; autenticação por senha desativada", check.StatusPass},
+		{"earlier Match overrides Match all", "PermitRootLogin no\nPasswordAuthentication no\nMatch User admin\n PermitRootLogin yes\nMatch all\n PermitRootLogin no\n", "login de root condicional; autenticação por senha desativada", check.StatusWarn},
+		{"first value in Match block wins", "PermitRootLogin no\nPasswordAuthentication no\nMatch User admin\n PermitRootLogin no\n PermitRootLogin yes\n", "login de root desativado; autenticação por senha desativada", check.StatusPass},
+		{"conditional with unknown global", "PermitRootLogin no\nMatch User admin\n PasswordAuthentication no\n", "login de root desativado; autenticação por senha condicional", check.StatusWarn},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -168,12 +168,12 @@ func TestSSHCheckMatchPolicy(t *testing.T) {
 func TestSSHCheckUnavailableAndAmbiguousConfig(t *testing.T) {
 	t.Run("main absent", func(t *testing.T) {
 		c := sshCheck{configPath: filepath.Join(t.TempDir(), "sshd_config"), readFile: readSSHFile}
-		assertSSHResult(t, c.Run(context.Background()), check.StatusWarn, "SSH server config not found")
+		assertSSHResult(t, c.Run(context.Background()), check.StatusWarn, "configuração do servidor SSH não encontrada")
 	})
 	t.Run("main unreadable", func(t *testing.T) {
 		c := sshFixture(t, "PermitRootLogin no\nPasswordAuthentication no\n", nil)
 		c.readFile = func(context.Context, string) ([]byte, error) { return nil, os.ErrPermission }
-		assertSSHResult(t, c.Run(context.Background()), check.StatusWarn, "SSH server config unreadable")
+		assertSSHResult(t, c.Run(context.Background()), check.StatusWarn, "configuração do servidor SSH ilegível")
 	})
 	t.Run("include unreadable", func(t *testing.T) {
 		c := sshFixture(t, "Include policy.conf\nPermitRootLogin no\nPasswordAuthentication no\n", map[string]string{"policy.conf": "PermitRootLogin yes\n"})
@@ -183,27 +183,27 @@ func TestSSHCheckUnavailableAndAmbiguousConfig(t *testing.T) {
 			}
 			return readSSHFile(ctx, path)
 		}
-		assertSSHResult(t, c.Run(context.Background()), check.StatusWarn, "SSH Include could not be read")
+		assertSSHResult(t, c.Run(context.Background()), check.StatusWarn, "não foi possível ler o Include do SSH")
 	})
 	t.Run("include cycle", func(t *testing.T) {
 		c := sshFixture(t, "Include a.conf\nPermitRootLogin no\nPasswordAuthentication no\n", map[string]string{"a.conf": "Include b.conf\n", "b.conf": "Include a.conf\n"})
-		assertSSHResult(t, c.Run(context.Background()), check.StatusWarn, "SSH Include cycle detected")
+		assertSSHResult(t, c.Run(context.Background()), check.StatusWarn, "ciclo de Include do SSH detectado")
 	})
 	t.Run("wildcard directory unsupported", func(t *testing.T) {
 		c := sshFixture(t, "Include */policy.conf\nPermitRootLogin no\nPasswordAuthentication no\n", nil)
-		assertSSHResult(t, c.Run(context.Background()), check.StatusWarn, "SSH configuration could not be interpreted")
+		assertSSHResult(t, c.Run(context.Background()), check.StatusWarn, "não foi possível interpretar a configuração SSH")
 	})
 	t.Run("malformed tracked value", func(t *testing.T) {
 		c := sshFixture(t, "PermitRootLogin no extra\nPasswordAuthentication no\n", nil)
-		assertSSHResult(t, c.Run(context.Background()), check.StatusWarn, "SSH configuration could not be interpreted")
+		assertSSHResult(t, c.Run(context.Background()), check.StatusWarn, "não foi possível interpretar a configuração SSH")
 	})
 	t.Run("malformed quote", func(t *testing.T) {
 		c := sshFixture(t, "PermitRootLogin \"no\nPasswordAuthentication no\n", nil)
-		assertSSHResult(t, c.Run(context.Background()), check.StatusWarn, "SSH configuration could not be interpreted")
+		assertSSHResult(t, c.Run(context.Background()), check.StatusWarn, "não foi possível interpretar a configuração SSH")
 	})
 	t.Run("Match all cannot have other criteria", func(t *testing.T) {
 		c := sshFixture(t, "PermitRootLogin no\nPasswordAuthentication no\nMatch all User admin\n PermitRootLogin no\n", nil)
-		assertSSHResult(t, c.Run(context.Background()), check.StatusWarn, "SSH configuration could not be interpreted")
+		assertSSHResult(t, c.Run(context.Background()), check.StatusWarn, "não foi possível interpretar a configuração SSH")
 	})
 }
 
@@ -217,7 +217,7 @@ func TestSSHCheckCancellation(t *testing.T) {
 		return []byte("PermitRootLogin no\nPasswordAuthentication no\n"), nil
 	}
 	result := c.Run(ctx)
-	if result.Status != check.StatusWarn || !strings.Contains(result.Message, "scan interrupted") || calls != 1 {
+	if result.Status != check.StatusWarn || !strings.Contains(result.Message, "varredura interrompida") || calls != 1 {
 		t.Fatalf("got %#v after %d reads; want interrupted warning", result, calls)
 	}
 	result = c.Run(ctx)
@@ -227,7 +227,7 @@ func TestSSHCheckCancellation(t *testing.T) {
 }
 
 func TestSSHCheckRegisteredInOrder(t *testing.T) {
-	want := []string{"OS", "Uptime", "Memory", "Root disk", "Systemd", "SSH", "Firewall", "Packages", "Docker"}
+	want := []string{"Sistema operacional", "Tempo ativo", "Memória", "Disco raiz", "Systemd", "SSH", "Firewall", "Pacotes", "Docker"}
 	checks := Checks()
 	names := make([]string, len(checks))
 	for i, diagnostic := range checks {

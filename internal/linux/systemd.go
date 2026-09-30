@@ -12,7 +12,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/marcospjr07/docktor/internal/check"
+	"github.com/marcospjr07/docktor-pt-br/internal/check"
 )
 
 const (
@@ -43,37 +43,37 @@ func (c systemdCheck) Run(ctx context.Context) check.Result {
 		return result
 	}
 	if errors.Is(queryCtx.Err(), context.DeadlineExceeded) || errors.Is(err, context.DeadlineExceeded) {
-		return systemdWarning("systemd service query timed out")
+		return systemdWarning("a consulta de serviços do systemd excedeu o tempo limite")
 	}
 	if errors.Is(err, context.Canceled) {
-		return systemdWarning("systemd service query interrupted")
+		return systemdWarning("a consulta de serviços do systemd foi interrompida")
 	}
 	if errors.Is(err, exec.ErrNotFound) || errors.Is(err, os.ErrNotExist) {
-		return systemdWarning("systemctl not found")
+		return systemdWarning("systemctl não encontrado")
 	}
 	if err != nil {
-		return systemdWarning("cannot query systemd services")
+		return systemdWarning("não foi possível consultar os serviços do systemd")
 	}
 
 	units, err := parseFailedServiceUnits(output)
 	if err != nil {
-		return systemdWarning("invalid systemd service data")
+		return systemdWarning("dados de serviços do systemd inválidos")
 	}
 	if len(units) == 0 {
-		return check.Result{Status: check.StatusPass, Message: "no failed service units"}
+		return check.Result{Status: check.StatusPass, Message: "nenhuma unidade de serviço com falha"}
 	}
 
 	visible := units
 	if len(visible) > maxFailedUnitNames {
 		visible = visible[:maxFailedUnitNames]
 	}
-	label := "failed service"
+	label := "serviço com falha"
 	if len(units) != 1 {
-		label += "s"
+		label = "serviços com falha"
 	}
 	message := fmt.Sprintf("%d %s: %s", len(units), label, strings.Join(visible, ", "))
 	if remaining := len(units) - len(visible); remaining > 0 {
-		message += fmt.Sprintf(" (+%d more)", remaining)
+		message += fmt.Sprintf(" (+%d a mais)", remaining)
 	}
 	return check.Result{Status: check.StatusFail, Message: message}
 }
@@ -83,7 +83,7 @@ func parseFailedServiceUnits(output []byte) ([]string, error) {
 	// Only an explicit JSON array can establish that no units failed. Empty,
 	// null, or truncated output must not turn into a false PASS.
 	if len(output) == 0 || output[0] != '[' {
-		return nil, errors.New("expected systemd unit array")
+		return nil, errors.New("era esperada uma lista de unidades do systemd")
 	}
 	var entries []struct {
 		Unit   string `json:"unit"`
@@ -99,7 +99,7 @@ func parseFailedServiceUnits(output []byte) ([]string, error) {
 		name := entry.Unit
 		if entry.Active != "failed" || len(name) <= len(".service") || !strings.HasSuffix(name, ".service") ||
 			strings.IndexFunc(name, func(r rune) bool { return r < '!' || r > '~' }) >= 0 {
-			return nil, errors.New("invalid failed service unit")
+			return nil, errors.New("unidade de serviço com falha inválida")
 		}
 		if _, exists := seen[name]; !exists {
 			seen[name] = struct{}{}

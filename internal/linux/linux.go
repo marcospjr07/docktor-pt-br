@@ -8,7 +8,7 @@ import (
 	"syscall"
 	"time"
 
-	"github.com/marcospjr07/docktor/internal/check"
+	"github.com/marcospjr07/docktor-pt-br/internal/check"
 )
 
 type readFileFunc func(string) ([]byte, error)
@@ -67,7 +67,14 @@ func readFilesystem(path string) (filesystemStats, error) {
 
 func contextWarning(ctx context.Context) (check.Result, bool) {
 	if err := ctx.Err(); err != nil {
-		return check.Result{Status: check.StatusWarn, Message: "scan interrupted: " + err.Error()}, true
+		message := err.Error()
+		switch err {
+		case context.Canceled:
+			message = "contexto cancelado"
+		case context.DeadlineExceeded:
+			message = "prazo do contexto excedido"
+		}
+		return check.Result{Status: check.StatusWarn, Message: "varredura interrompida: " + message}, true
 	}
 	return check.Result{}, false
 }

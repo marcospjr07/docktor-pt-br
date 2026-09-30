@@ -11,7 +11,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/marcospjr07/docktor/internal/check"
+	"github.com/marcospjr07/docktor-pt-br/internal/check"
 )
 
 const (
@@ -41,29 +41,29 @@ func TestFirewallCheckBackendStates(t *testing.T) {
 		wantStatus         check.Status
 		wantMessage        string
 	}{
-		{name: "neither installed", wantStatus: check.StatusWarn, wantMessage: "no supported firewall tooling found"},
-		{name: "UFW active", ufwInstalled: true, ufwOutput: "Status: active\nTo Action From\n", wantStatus: check.StatusPass, wantMessage: "UFW active"},
-		{name: "UFW inactive", ufwInstalled: true, ufwOutput: "Status: inactive\n", wantStatus: check.StatusWarn, wantMessage: "UFW installed but inactive"},
-		{name: "UFW unknown", ufwInstalled: true, ufwOutput: "Status: uncertain\n", wantStatus: check.StatusWarn, wantMessage: "UFW state unavailable"},
-		{name: "UFW query error", ufwInstalled: true, ufwOutput: "Status: active\n", ufwErr: os.ErrPermission, wantStatus: check.StatusWarn, wantMessage: "UFW state unavailable"},
-		{name: "UFW stderr is not state", ufwInstalled: true, ufwOutput: "Status: active\n", ufwStderr: "unexpected warning\n", wantStatus: check.StatusWarn, wantMessage: "UFW state unavailable"},
-		{name: "firewalld running", firewalldInstalled: true, serviceOutput: firewalldRunning, firewalldOutput: "running\n", wantFirewalldCmd: true, wantStatus: check.StatusPass, wantMessage: "firewalld active"},
-		{name: "firewalld stopped", firewalldInstalled: true, serviceOutput: firewalldStopped, wantStatus: check.StatusWarn, wantMessage: "firewalld installed but inactive"},
-		{name: "firewalld failed", firewalldInstalled: true, serviceOutput: "LoadState=loaded\nActiveState=failed\nSubState=failed\n", wantStatus: check.StatusWarn, wantMessage: "firewalld reported a startup failure"},
-		{name: "firewalld unknown", firewalldInstalled: true, serviceOutput: "LoadState=loaded\nActiveState=active\nSubState=exited\n", wantStatus: check.StatusWarn, wantMessage: "firewalld state unavailable"},
-		{name: "firewalld unit missing", firewalldInstalled: true, serviceOutput: "LoadState=not-found\nActiveState=inactive\nSubState=dead\n", wantStatus: check.StatusWarn, wantMessage: "firewalld state unavailable"},
-		{name: "firewalld query error", firewalldInstalled: true, serviceOutput: firewalldRunning, serviceErr: errors.New("manager unavailable"), wantStatus: check.StatusWarn, wantMessage: "firewalld state unavailable"},
-		{name: "firewalld not running after preflight", firewalldInstalled: true, serviceOutput: firewalldRunning, firewalldOutput: "not running\n", firewalldExit: 252, firewalldErr: errors.New("not running"), wantFirewalldCmd: true, wantStatus: check.StatusWarn, wantMessage: "firewalld installed but inactive"},
-		{name: "firewalld internal failure", firewalldInstalled: true, serviceOutput: firewalldRunning, firewalldOutput: "failed\n", firewalldExit: 251, firewalldErr: errors.New("startup failed"), wantFirewalldCmd: true, wantStatus: check.StatusWarn, wantMessage: "firewalld reported a startup failure"},
-		{name: "firewalld exit does not match output", firewalldInstalled: true, serviceOutput: firewalldRunning, firewalldOutput: "running\n", firewalldExit: 251, firewalldErr: errors.New("startup failed"), wantFirewalldCmd: true, wantStatus: check.StatusWarn, wantMessage: "firewalld state unavailable"},
-		{name: "firewalld unknown state", firewalldInstalled: true, serviceOutput: firewalldRunning, firewalldOutput: "unexpected\n", wantFirewalldCmd: true, wantStatus: check.StatusWarn, wantMessage: "firewalld state unavailable"},
-		{name: "firewalld stderr is not state", firewalldInstalled: true, serviceOutput: firewalldRunning, firewalldOutput: "running\n", firewalldStderr: "unexpected warning\n", wantFirewalldCmd: true, wantStatus: check.StatusWarn, wantMessage: "firewalld state unavailable"},
-		{name: "firewalld command error", firewalldInstalled: true, serviceOutput: firewalldRunning, firewalldOutput: "running\n", firewalldErr: os.ErrPermission, wantFirewalldCmd: true, wantStatus: check.StatusWarn, wantMessage: "firewalld state unavailable"},
-		{name: "both active", ufwInstalled: true, ufwOutput: "Status: active\n", firewalldInstalled: true, serviceOutput: firewalldRunning, firewalldOutput: "running\n", wantFirewalldCmd: true, wantStatus: check.StatusPass, wantMessage: "UFW and firewalld active"},
-		{name: "UFW active and firewalld inactive", ufwInstalled: true, ufwOutput: "Status: active\n", firewalldInstalled: true, serviceOutput: firewalldStopped, wantStatus: check.StatusPass, wantMessage: "UFW active; firewalld installed but inactive"},
-		{name: "UFW inactive and firewalld active", ufwInstalled: true, ufwOutput: "Status: inactive\n", firewalldInstalled: true, serviceOutput: firewalldRunning, firewalldOutput: "running\n", wantFirewalldCmd: true, wantStatus: check.StatusPass, wantMessage: "UFW installed but inactive; firewalld active"},
-		{name: "UFW unavailable and firewalld active", ufwInstalled: true, ufwErr: os.ErrPermission, firewalldInstalled: true, serviceOutput: firewalldRunning, firewalldOutput: "running\n", wantFirewalldCmd: true, wantStatus: check.StatusPass, wantMessage: "UFW state unavailable; firewalld active"},
-		{name: "both inactive", ufwInstalled: true, ufwOutput: "Status: inactive\n", firewalldInstalled: true, serviceOutput: firewalldStopped, wantStatus: check.StatusWarn, wantMessage: "UFW installed but inactive; firewalld installed but inactive"},
+		{name: "neither installed", wantStatus: check.StatusWarn, wantMessage: "nenhuma ferramenta de firewall compatível encontrada"},
+		{name: "UFW ativo", ufwInstalled: true, ufwOutput: "Status: active\nTo Action From\n", wantStatus: check.StatusPass, wantMessage: "UFW ativo"},
+		{name: "UFW inactive", ufwInstalled: true, ufwOutput: "Status: inactive\n", wantStatus: check.StatusWarn, wantMessage: "UFW instalado, mas inativo"},
+		{name: "UFW unknown", ufwInstalled: true, ufwOutput: "Status: uncertain\n", wantStatus: check.StatusWarn, wantMessage: "estado do UFW indisponível"},
+		{name: "UFW query error", ufwInstalled: true, ufwOutput: "Status: active\n", ufwErr: os.ErrPermission, wantStatus: check.StatusWarn, wantMessage: "estado do UFW indisponível"},
+		{name: "UFW stderr is not state", ufwInstalled: true, ufwOutput: "Status: active\n", ufwStderr: "unexpected warning\n", wantStatus: check.StatusWarn, wantMessage: "estado do UFW indisponível"},
+		{name: "firewalld running", firewalldInstalled: true, serviceOutput: firewalldRunning, firewalldOutput: "running\n", wantFirewalldCmd: true, wantStatus: check.StatusPass, wantMessage: "firewalld ativo"},
+		{name: "firewalld stopped", firewalldInstalled: true, serviceOutput: firewalldStopped, wantStatus: check.StatusWarn, wantMessage: "firewalld instalado, mas inativo"},
+		{name: "firewalld failed", firewalldInstalled: true, serviceOutput: "LoadState=loaded\nActiveState=failed\nSubState=failed\n", wantStatus: check.StatusWarn, wantMessage: "firewalld relatou uma falha na inicialização"},
+		{name: "firewalld unknown", firewalldInstalled: true, serviceOutput: "LoadState=loaded\nActiveState=active\nSubState=exited\n", wantStatus: check.StatusWarn, wantMessage: "estado do firewalld indisponível"},
+		{name: "firewalld unit missing", firewalldInstalled: true, serviceOutput: "LoadState=not-found\nActiveState=inactive\nSubState=dead\n", wantStatus: check.StatusWarn, wantMessage: "estado do firewalld indisponível"},
+		{name: "firewalld query error", firewalldInstalled: true, serviceOutput: firewalldRunning, serviceErr: errors.New("manager unavailable"), wantStatus: check.StatusWarn, wantMessage: "estado do firewalld indisponível"},
+		{name: "firewalld not running after preflight", firewalldInstalled: true, serviceOutput: firewalldRunning, firewalldOutput: "not running\n", firewalldExit: 252, firewalldErr: errors.New("not running"), wantFirewalldCmd: true, wantStatus: check.StatusWarn, wantMessage: "firewalld instalado, mas inativo"},
+		{name: "firewalld internal failure", firewalldInstalled: true, serviceOutput: firewalldRunning, firewalldOutput: "failed\n", firewalldExit: 251, firewalldErr: errors.New("startup failed"), wantFirewalldCmd: true, wantStatus: check.StatusWarn, wantMessage: "firewalld relatou uma falha na inicialização"},
+		{name: "firewalld exit does not match output", firewalldInstalled: true, serviceOutput: firewalldRunning, firewalldOutput: "running\n", firewalldExit: 251, firewalldErr: errors.New("startup failed"), wantFirewalldCmd: true, wantStatus: check.StatusWarn, wantMessage: "estado do firewalld indisponível"},
+		{name: "firewalld unknown state", firewalldInstalled: true, serviceOutput: firewalldRunning, firewalldOutput: "unexpected\n", wantFirewalldCmd: true, wantStatus: check.StatusWarn, wantMessage: "estado do firewalld indisponível"},
+		{name: "firewalld stderr is not state", firewalldInstalled: true, serviceOutput: firewalldRunning, firewalldOutput: "running\n", firewalldStderr: "unexpected warning\n", wantFirewalldCmd: true, wantStatus: check.StatusWarn, wantMessage: "estado do firewalld indisponível"},
+		{name: "firewalld command error", firewalldInstalled: true, serviceOutput: firewalldRunning, firewalldOutput: "running\n", firewalldErr: os.ErrPermission, wantFirewalldCmd: true, wantStatus: check.StatusWarn, wantMessage: "estado do firewalld indisponível"},
+		{name: "both active", ufwInstalled: true, ufwOutput: "Status: active\n", firewalldInstalled: true, serviceOutput: firewalldRunning, firewalldOutput: "running\n", wantFirewalldCmd: true, wantStatus: check.StatusPass, wantMessage: "UFW e firewalld ativos"},
+		{name: "UFW active and firewalld inactive", ufwInstalled: true, ufwOutput: "Status: active\n", firewalldInstalled: true, serviceOutput: firewalldStopped, wantStatus: check.StatusPass, wantMessage: "UFW ativo; firewalld instalado, mas inativo"},
+		{name: "UFW inactive and firewalld active", ufwInstalled: true, ufwOutput: "Status: inactive\n", firewalldInstalled: true, serviceOutput: firewalldRunning, firewalldOutput: "running\n", wantFirewalldCmd: true, wantStatus: check.StatusPass, wantMessage: "UFW instalado, mas inativo; firewalld ativo"},
+		{name: "UFW unavailable and firewalld active", ufwInstalled: true, ufwErr: os.ErrPermission, firewalldInstalled: true, serviceOutput: firewalldRunning, firewalldOutput: "running\n", wantFirewalldCmd: true, wantStatus: check.StatusPass, wantMessage: "estado do UFW indisponível; firewalld ativo"},
+		{name: "both inactive", ufwInstalled: true, ufwOutput: "Status: inactive\n", firewalldInstalled: true, serviceOutput: firewalldStopped, wantStatus: check.StatusWarn, wantMessage: "UFW instalado, mas inativo; firewalld instalado, mas inativo"},
 	}
 
 	for _, tt := range tests {
@@ -162,7 +162,7 @@ func TestFirewallLookupErrorIsNotAbsence(t *testing.T) {
 		return "", exec.ErrNotFound
 	}}
 	got := c.Run(context.Background())
-	if got.Status != check.StatusWarn || got.Message != "UFW state unavailable" {
+	if got.Status != check.StatusWarn || got.Message != "estado do UFW indisponível" {
 		t.Fatalf("got %#v; want lookup warning", got)
 	}
 }
@@ -188,7 +188,7 @@ func TestFirewallProbeTimeout(t *testing.T) {
 				},
 			}
 			got := c.Run(context.Background())
-			if got.Status != check.StatusWarn || !strings.Contains(got.Message, "state unavailable") {
+			if got.Status != check.StatusWarn || !strings.Contains(got.Message, "estado do") {
 				t.Fatalf("got %#v; timed out probe must warn", got)
 			}
 		})
@@ -216,7 +216,7 @@ func TestFirewallCommandTimeoutAfterActivePreflight(t *testing.T) {
 		},
 	}
 	got := c.Run(context.Background())
-	if got.Status != check.StatusWarn || got.Message != "firewalld state unavailable" {
+	if got.Status != check.StatusWarn || got.Message != "estado do firewalld indisponível" {
 		t.Fatalf("got %#v; timed out state query must warn", got)
 	}
 }
@@ -238,7 +238,7 @@ func TestFirewallCanceledContextSkipsRemainingProbes(t *testing.T) {
 		},
 	}
 	got := c.Run(ctx)
-	if got.Status != check.StatusWarn || !strings.Contains(got.Message, "scan interrupted") || calls != 1 {
+	if got.Status != check.StatusWarn || !strings.Contains(got.Message, "varredura interrompida") || calls != 1 {
 		t.Fatalf("got %#v after %d lookups; want interrupted warning", got, calls)
 	}
 	got = c.Run(ctx)

@@ -12,7 +12,7 @@ import (
 	"strings"
 	"syscall"
 
-	"github.com/marcospjr07/docktor/internal/check"
+	"github.com/marcospjr07/docktor-pt-br/internal/check"
 )
 
 const (
@@ -24,11 +24,11 @@ const (
 )
 
 var (
-	errSSHMainRead    = errors.New("SSH main config unreadable")
-	errSSHIncludeRead = errors.New("SSH Include unreadable")
-	errSSHIncludeLoop = errors.New("SSH Include cycle")
-	errSSHLimit       = errors.New("SSH config limit reached")
-	errSSHSyntax      = errors.New("SSH config syntax unclear")
+	errSSHMainRead    = errors.New("configuração principal do SSH ilegível")
+	errSSHIncludeRead = errors.New("Include do SSH ilegível")
+	errSSHIncludeLoop = errors.New("ciclo de Include do SSH")
+	errSSHLimit       = errors.New("limite da configuração SSH atingido")
+	errSSHSyntax      = errors.New("sintaxe da configuração SSH incerta")
 )
 
 type sshFileReader func(context.Context, string) ([]byte, error)
@@ -70,17 +70,17 @@ func (c sshCheck) Run(ctx context.Context) check.Result {
 	if err != nil {
 		switch {
 		case errors.Is(err, errSSHMainRead) && errors.Is(err, os.ErrNotExist):
-			return sshWarning("SSH server config not found")
+			return sshWarning("configuração do servidor SSH não encontrada")
 		case errors.Is(err, errSSHMainRead):
-			return sshWarning("SSH server config unreadable")
+			return sshWarning("configuração do servidor SSH ilegível")
 		case errors.Is(err, errSSHIncludeRead):
-			return sshWarning("SSH Include could not be read")
+			return sshWarning("não foi possível ler o Include do SSH")
 		case errors.Is(err, errSSHIncludeLoop):
-			return sshWarning("SSH Include cycle detected")
+			return sshWarning("ciclo de Include do SSH detectado")
 		case errors.Is(err, errSSHLimit):
-			return sshWarning("SSH config exceeds inspection limit")
+			return sshWarning("a configuração SSH excede o limite de inspeção")
 		default:
-			return sshWarning("SSH configuration could not be interpreted")
+			return sshWarning("não foi possível interpretar a configuração SSH")
 		}
 	}
 
@@ -100,30 +100,30 @@ func sshWarning(message string) check.Result {
 func rootPolicyMessage(value string) string {
 	switch value {
 	case "no":
-		return "root login disabled"
+		return "login de root desativado"
 	case "yes":
-		return "root login enabled"
+		return "login de root ativado"
 	case "prohibit-password":
-		return "root login limited to non-password methods"
+		return "login de root limitado a métodos sem senha"
 	case "forced-commands-only":
-		return "root login limited to forced commands"
+		return "login de root limitado a comandos forçados"
 	case "conditional":
-		return "root login conditional"
+		return "login de root condicional"
 	default:
-		return "root login unknown"
+		return "login de root desconhecido"
 	}
 }
 
 func passwordPolicyMessage(value string) string {
 	switch value {
 	case "no":
-		return "password authentication disabled"
+		return "autenticação por senha desativada"
 	case "yes":
-		return "password authentication enabled"
+		return "autenticação por senha ativada"
 	case "conditional":
-		return "password authentication conditional"
+		return "autenticação por senha condicional"
 	default:
-		return "password authentication unknown"
+		return "autenticação por senha desconhecida"
 	}
 }
 

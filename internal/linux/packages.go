@@ -12,7 +12,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/marcospjr07/docktor/internal/check"
+	"github.com/marcospjr07/docktor-pt-br/internal/check"
 )
 
 const (
@@ -24,7 +24,7 @@ const (
 )
 
 var (
-	errAPTOutputLimit = errors.New("APT query output limit exceeded")
+	errAPTOutputLimit = errors.New("a saída da consulta APT excedeu o limite")
 	aptSummaryPattern = regexp.MustCompile(`^([0-9]+) upgraded, ([0-9]+) newly installed, ([0-9]+) to remove and ([0-9]+) not upgraded\.$`)
 )
 
@@ -43,7 +43,7 @@ type packagesCheck struct {
 	timeout  time.Duration
 }
 
-func (packagesCheck) Name() string { return "Packages" }
+func (packagesCheck) Name() string { return "Pacotes" }
 
 func (c packagesCheck) Run(ctx context.Context) check.Result {
 	if result, interrupted := contextWarning(ctx); interrupted {
@@ -55,12 +55,12 @@ func (c packagesCheck) Run(ctx context.Context) check.Result {
 	}
 	if err != nil {
 		if errors.Is(err, exec.ErrNotFound) || errors.Is(err, os.ErrNotExist) {
-			return packagesWarning("no supported package manager found")
+			return packagesWarning("nenhum gerenciador de pacotes compatível encontrado")
 		}
-		return packagesWarning("APT lookup unavailable")
+		return packagesWarning("busca pelo APT indisponível")
 	}
 	if path == "" {
-		return packagesWarning("APT lookup unavailable")
+		return packagesWarning("busca pelo APT indisponível")
 	}
 
 	timeout := c.timeout
@@ -76,40 +76,42 @@ func (c packagesCheck) Run(ctx context.Context) check.Result {
 		return result
 	}
 	if errors.Is(queryCtx.Err(), context.DeadlineExceeded) || errors.Is(err, context.DeadlineExceeded) {
-		return packagesWarning("APT query timed out")
+		return packagesWarning("a consulta APT excedeu o tempo limite")
 	}
 	if errors.Is(err, context.Canceled) {
-		return packagesWarning("APT query interrupted")
+		return packagesWarning("a consulta APT foi interrompida")
 	}
 	if errors.Is(err, errAPTOutputLimit) || len(output.stdout) > maxAPTStdout || len(output.stderr) > maxAPTStderr {
-		return packagesWarning("APT query output too large")
+		return packagesWarning("saída da consulta APT grande demais")
 	}
 	if err != nil {
-		return packagesWarning("APT query unavailable")
+		return packagesWarning("consulta APT indisponível")
 	}
 	if len(output.stderr) != 0 {
-		return packagesWarning("APT query reported warnings")
+		return packagesWarning("a consulta APT relatou avisos")
 	}
 	summary, err := parseAPTSummary(output.stdout)
 	if err != nil {
-		return packagesWarning("APT summary could not be interpreted")
+		return packagesWarning("não foi possível interpretar o resumo do APT")
 	}
 
-	message := "no updates listed"
+	message := "nenhuma atualização listada"
 	if summary.upgraded > 0 {
-		label := "updates"
+		label := "atualizações"
+		availability := "disponíveis"
 		if summary.upgraded == 1 {
-			label = "update"
+			label = "atualização"
+			availability = "disponível"
 		}
-		message = fmt.Sprintf("%d %s available", summary.upgraded, label)
+		message = fmt.Sprintf("%d %s %s", summary.upgraded, label, availability)
 	}
 	if summary.removed > 0 {
-		message += "; simulation includes removals"
+		message += "; a simulação inclui remoções"
 	} else if summary.upgraded == 0 && summary.installed > 0 {
-		message += "; simulation includes new packages"
+		message += "; a simulação inclui novos pacotes"
 	}
 	if summary.kept > 0 {
-		message += fmt.Sprintf("; %d kept back", summary.kept)
+		message += fmt.Sprintf("; %d mantidos na versão atual", summary.kept)
 	}
 	stamp, err := c.stat(aptRefreshStamp)
 	now := c.now()
@@ -117,9 +119,9 @@ func (c packagesCheck) Run(ctx context.Context) check.Result {
 		return result
 	}
 	if oldAPTRefresh(now, stamp, err) {
-		message += "; recorded APT refresh over 24h old"
+		message += "; registro de atualização do APT com mais de 24h"
 	} else {
-		message += "; package metadata freshness unknown"
+		message += "; atualidade dos metadados de pacotes desconhecida"
 	}
 	// Neither update-stamp nor Post-Invoke-Success proves every repository was
 	// refreshed: APT can retain old indexes after transient failures. A recent
@@ -144,12 +146,12 @@ func parseAPTSummary(output []byte) (aptSummary, error) {
 			// Reject an unfamiliar summary as well as a missing one. In
 			// particular, do not silently ignore a second, changed format.
 			if bytes.Contains(line, []byte("newly installed,")) || bytes.Contains(line, []byte("to remove and")) {
-				return aptSummary{}, errors.New("unrecognized APT summary")
+				return aptSummary{}, errors.New("resumo do APT não reconhecido")
 			}
 			continue
 		}
 		if found {
-			return aptSummary{}, errors.New("ambiguous APT summary")
+			return aptSummary{}, errors.New("resumo do APT ambíguo")
 		}
 		counts := []*int{&summary.upgraded, &summary.installed, &summary.removed, &summary.kept}
 		for i, count := range counts {
@@ -162,7 +164,7 @@ func parseAPTSummary(output []byte) (aptSummary, error) {
 		found = true
 	}
 	if !found {
-		return aptSummary{}, errors.New("missing APT summary")
+		return aptSummary{}, errors.New("resumo do APT ausente")
 	}
 	return summary, nil
 }

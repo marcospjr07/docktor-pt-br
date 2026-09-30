@@ -6,14 +6,14 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/marcospjr07/docktor/internal/check"
+	"github.com/marcospjr07/docktor-pt-br/internal/check"
 )
 
 type osCheck struct {
 	readFile readFileFunc
 }
 
-func (osCheck) Name() string { return "OS" }
+func (osCheck) Name() string { return "Sistema operacional" }
 
 func (c osCheck) Run(ctx context.Context) check.Result {
 	if result, interrupted := contextWarning(ctx); interrupted {
@@ -34,7 +34,7 @@ func (c osCheck) Run(ctx context.Context) check.Result {
 		}
 		return check.Result{Status: check.StatusPass, Message: name}
 	}
-	return check.Result{Status: check.StatusWarn, Message: "identification unavailable: " + strings.Join(failures, "; ")}
+	return check.Result{Status: check.StatusWarn, Message: "identificação indisponível: " + strings.Join(failures, "; ")}
 }
 
 func parseOSRelease(data []byte) (string, error) {
@@ -74,7 +74,7 @@ func parseOSRelease(data []byte) (string, error) {
 		return prettyName, nil
 	}
 	if name == "" {
-		return "", errors.New("missing PRETTY_NAME and NAME")
+		return "", errors.New("PRETTY_NAME e NAME ausentes")
 	}
 	if versionID != "" {
 		return name + " " + versionID, nil
@@ -94,7 +94,7 @@ func parseOSReleaseValue(raw string) (string, error) {
 		return raw, nil
 	}
 	if len(raw) < 2 || raw[len(raw)-1] != quote {
-		return "", errors.New("unterminated quoted value")
+		return "", errors.New("valor entre aspas não terminado")
 	}
 	var value strings.Builder
 	inner := raw[1 : len(raw)-1]
