@@ -93,7 +93,7 @@ make check
 
 ## Versão em inglês
 
-Novas funcionalidades são desenvolvidas no [repositório original em inglês](https://github.com/marcospjr07/docktor) e são sincronizadas para esta edição, mantendo a arquitetura e a estrutura do contrato JSON do repositório original.
+Novas funcionalidades são desenvolvidas no [repositório original em inglês](https://github.com/marcospjr07/docktor) e são sincronizadas para esta edição, mantendo a arquitetura e o contrato JSON do repositório original.
 
 ## Próximos passos
 
