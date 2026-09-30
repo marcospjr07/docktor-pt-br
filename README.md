@@ -1,6 +1,6 @@
-# Docktor [PT-BR]
+# 🇧🇷 Docktor [pt-br]
 
-Esta é a edição [PT-BR] do [Docktor](https://github.com/marcospjr07/docktor), uma ferramenta de linha de comando (CLI) para diagnosticar o funcionamento de servidores Linux em modo somente leitura. `docktor scan` apresenta os indicadores do servidor em formato de texto no terminal por padrão. Use `docktor scan --json` para obter uma saída estruturada para uso em automações.
+Esta é a edição em português do [Docktor](https://github.com/marcospjr07/docktor), uma ferramenta de linha de comando (CLI) para diagnosticar o funcionamento de servidores Linux em modo somente leitura. `docktor scan` apresenta os indicadores do servidor em formato de texto no terminal por padrão. Use `docktor scan --json` para obter uma saída estruturada para uso em automações.
 
 ## Exemplo
 
@@ -93,8 +93,8 @@ make check
 
 ## Versão em inglês
 
-Novas funcionalidades são desenvolvidas no [repositório original em inglês](https://github.com/marcospjr07/docktor) e são sincronizadas para esta edição [PT-BR]. A edição [PT-BR] preserva a arquitetura, o comportamento e a estrutura do contrato JSON do repositório original.
+Novas funcionalidades são desenvolvidas no [repositório original em inglês](https://github.com/marcospjr07/docktor) e são sincronizadas para esta edição, preservando arquitetura, comportamento e a estrutura do contrato JSON do repositório original.
 
 ## Próximos passos
 
-Adicionar verificações independentes de rede em modo somente leitura. Outros gerenciadores de pacotes, um registro confiável de atualização completa dos índices e uma interpretação mais ampla das regras de firewall podem ser planejados separadamente.
+Adicionar verificações independentes de rede. Outros gerenciadores de pacotes, um registro confiável de atualização completa dos índices e uma interpretação mais ampla das regras de firewall podem ser planejados separadamente.
