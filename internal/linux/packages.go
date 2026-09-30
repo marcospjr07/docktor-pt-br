@@ -24,7 +24,7 @@ const (
 )
 
 var (
-	errAPTOutputLimit = errors.New("a saída da consulta APT excedeu o limite")
+	errAPTOutputLimit = errors.New("a saída da consulta ao APT excedeu o limite")
 	aptSummaryPattern = regexp.MustCompile(`^([0-9]+) upgraded, ([0-9]+) newly installed, ([0-9]+) to remove and ([0-9]+) not upgraded\.$`)
 )
 
@@ -57,10 +57,10 @@ func (c packagesCheck) Run(ctx context.Context) check.Result {
 		if errors.Is(err, exec.ErrNotFound) || errors.Is(err, os.ErrNotExist) {
 			return packagesWarning("nenhum gerenciador de pacotes compatível encontrado")
 		}
-		return packagesWarning("busca pelo APT indisponível")
+		return packagesWarning("não foi possível localizar o executável do APT")
 	}
 	if path == "" {
-		return packagesWarning("busca pelo APT indisponível")
+		return packagesWarning("não foi possível localizar o executável do APT")
 	}
 
 	timeout := c.timeout
@@ -76,19 +76,19 @@ func (c packagesCheck) Run(ctx context.Context) check.Result {
 		return result
 	}
 	if errors.Is(queryCtx.Err(), context.DeadlineExceeded) || errors.Is(err, context.DeadlineExceeded) {
-		return packagesWarning("a consulta APT excedeu o tempo limite")
+		return packagesWarning("a consulta ao APT excedeu o tempo limite")
 	}
 	if errors.Is(err, context.Canceled) {
-		return packagesWarning("a consulta APT foi interrompida")
+		return packagesWarning("a consulta ao APT foi interrompida")
 	}
 	if errors.Is(err, errAPTOutputLimit) || len(output.stdout) > maxAPTStdout || len(output.stderr) > maxAPTStderr {
-		return packagesWarning("saída da consulta APT grande demais")
+		return packagesWarning("a saída da consulta ao APT excedeu o limite de tamanho")
 	}
 	if err != nil {
-		return packagesWarning("consulta APT indisponível")
+		return packagesWarning("consulta ao APT indisponível")
 	}
 	if len(output.stderr) != 0 {
-		return packagesWarning("a consulta APT relatou avisos")
+		return packagesWarning("a consulta ao APT relatou avisos")
 	}
 	summary, err := parseAPTSummary(output.stdout)
 	if err != nil {
@@ -111,7 +111,7 @@ func (c packagesCheck) Run(ctx context.Context) check.Result {
 		message += "; a simulação inclui novos pacotes"
 	}
 	if summary.kept > 0 {
-		message += fmt.Sprintf("; %d mantidos na versão atual", summary.kept)
+		message += fmt.Sprintf("; %d sem atualização", summary.kept)
 	}
 	stamp, err := c.stat(aptRefreshStamp)
 	now := c.now()
@@ -119,9 +119,9 @@ func (c packagesCheck) Run(ctx context.Context) check.Result {
 		return result
 	}
 	if oldAPTRefresh(now, stamp, err) {
-		message += "; registro de atualização do APT com mais de 24h"
+		message += "; registro de atualização dos índices do APT com mais de 24 h"
 	} else {
-		message += "; atualidade dos metadados de pacotes desconhecida"
+		message += "; não foi possível confirmar se os metadados dos pacotes estão atualizados"
 	}
 	// Neither update-stamp nor Post-Invoke-Success proves every repository was
 	// refreshed: APT can retain old indexes after transient failures. A recent

@@ -103,7 +103,7 @@ func contextErrorMessage(err error) string {
 	case context.Canceled:
 		return "contexto cancelado"
 	case context.DeadlineExceeded:
-		return "prazo do contexto excedido"
+		return "tempo limite do contexto excedido"
 	default:
 		return err.Error()
 	}

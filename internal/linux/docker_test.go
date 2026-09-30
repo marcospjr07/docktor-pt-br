@@ -105,7 +105,7 @@ func TestDockerCheckInvalidResponses(t *testing.T) {
 		want   string
 	}{
 		{"HTTP error", http.StatusServiceUnavailable, `{"message":"unavailable"}`, "a API local do Docker retornou HTTP 503"},
-		{"malformed JSON", http.StatusOK, `{"Version":`, "JSON local da versão do Docker inválido"},
+		{"malformed JSON", http.StatusOK, `{"Version":`, "JSON da resposta de versão do Docker local inválido"},
 		{"missing version", http.StatusOK, `{"ApiVersion":"1.52"}`, "versão do daemon local do Docker ausente"},
 		{"control character", http.StatusOK, `{"Version":"29.7.2\nPASS"}`, "versão do daemon local do Docker inválida"},
 	}
@@ -209,8 +209,8 @@ func TestDockerCheckSystemdSocketActivation(t *testing.T) {
 		wantDials    int32
 	}{
 		{"service running", "active", "active", check.StatusPass, "daemon local acessível (versão 29.7.2)", 1},
-		{"service stopped", "active", "inactive", check.StatusWarn, "o daemon local do Docker não está em execução; teste ignorado para evitar a ativação do socket", 0},
-		{"service reloading", "active", "reloading", check.StatusWarn, "o serviço local do Docker está mudando de estado; teste ignorado para evitar a ativação do socket", 0},
+		{"service stopped", "active", "inactive", check.StatusWarn, "o daemon local do Docker não está em execução; consulta não realizada para evitar a ativação do serviço pelo socket", 0},
+		{"service reloading", "active", "reloading", check.StatusWarn, "o serviço local do Docker está mudando de estado; consulta não realizada para evitar a ativação do serviço pelo socket", 0},
 		{"socket inactive", "inactive", "inactive", check.StatusPass, "daemon local acessível (versão 29.7.2)", 1},
 	}
 	for _, test := range tests {
@@ -276,7 +276,7 @@ func TestDockerCheckUnknownSystemdStateSkipsProbe(t *testing.T) {
 			}
 			result := c.Run(context.Background())
 			if result.Status != check.StatusWarn ||
-				result.Message != "estado do serviço local do Docker indisponível; teste ignorado para evitar a ativação do socket" || dials.Load() != 0 {
+				result.Message != "estado do serviço local do Docker indisponível; consulta não realizada para evitar a ativação do serviço pelo socket" || dials.Load() != 0 {
 				t.Fatalf("Run() = %+v, dial calls = %d", result, dials.Load())
 			}
 		})
@@ -318,7 +318,7 @@ func TestDockerCheckSystemdDeadlineSkipsProbe(t *testing.T) {
 		return nil, errors.New("unexpected dial")
 	}
 	result := c.Run(ctx)
-	if result.Status != check.StatusWarn || result.Message != "varredura interrompida: prazo do contexto excedido" || dials.Load() != 0 {
+	if result.Status != check.StatusWarn || result.Message != "varredura interrompida: tempo limite do contexto excedido" || dials.Load() != 0 {
 		t.Fatalf("Run() = %+v, dial calls = %d", result, dials.Load())
 	}
 }
@@ -347,7 +347,7 @@ func TestDockerCheckRootlessSystemdSocketActivation(t *testing.T) {
 	}
 	result := c.Run(context.Background())
 	if result.Status != check.StatusWarn ||
-		result.Message != "o daemon local do Docker não está em execução; teste ignorado para evitar a ativação do socket" || dials.Load() != 0 {
+		result.Message != "o daemon local do Docker não está em execução; consulta não realizada para evitar a ativação do serviço pelo socket" || dials.Load() != 0 {
 		t.Fatalf("Run() = %+v, dial calls = %d", result, dials.Load())
 	}
 }
@@ -367,7 +367,7 @@ func TestDockerCheckRootlessUnknownUserManagerSkipsProbe(t *testing.T) {
 	}
 	result := c.Run(context.Background())
 	if result.Status != check.StatusWarn ||
-		result.Message != "estado do serviço local do Docker indisponível; teste ignorado para evitar a ativação do socket" || dials.Load() != 0 {
+		result.Message != "estado do serviço local do Docker indisponível; consulta não realizada para evitar a ativação do serviço pelo socket" || dials.Load() != 0 {
 		t.Fatalf("Run() = %+v, dial calls = %d", result, dials.Load())
 	}
 }

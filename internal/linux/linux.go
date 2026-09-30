@@ -72,7 +72,7 @@ func contextWarning(ctx context.Context) (check.Result, bool) {
 		case context.Canceled:
 			message = "contexto cancelado"
 		case context.DeadlineExceeded:
-			message = "prazo do contexto excedido"
+			message = "tempo limite do contexto excedido"
 		}
 		return check.Result{Status: check.StatusWarn, Message: "varredura interrompida: " + message}, true
 	}

@@ -94,7 +94,7 @@ func parseOSReleaseValue(raw string) (string, error) {
 		return raw, nil
 	}
 	if len(raw) < 2 || raw[len(raw)-1] != quote {
-		return "", errors.New("valor entre aspas não terminado")
+		return "", errors.New("valor com aspas não fechadas")
 	}
 	var value strings.Builder
 	inner := raw[1 : len(raw)-1]
